@@ -4,28 +4,30 @@ import requests
 
 from bs4 import BeautifulSoup
 
+
 class Video:
     ''' Describe details of an video which includes:
 
         'designatio' 'title' 'cover_url' 'publish_date' 'video_length'
         'director' 'manufacturer' 'publisher' 'genres' 'actors'
     '''
-    file_dir        = ""
-    file_name       = ""
-    file_path       = ""
-    file_type       = ""
-    designatio      = ""
-    title           = ""
-    cover_url       = ""
-    publish_date    = ""
-    video_length    = ""
-    director        = ""
-    manufacturer    = ""
-    publisher       = ""
-    series          = []
-    genres          = []
-    actors          = []
-    is_updated      = False
+
+    file_dir = ""
+    file_name = ""
+    file_path = ""
+    file_type = ""
+    designatio = ""
+    title = ""
+    cover_url = ""
+    publish_date = ""
+    video_length = ""
+    director = ""
+    manufacturer = ""
+    publisher = ""
+    series = []
+    genres = []
+    actors = []
+    is_updated = False
 
     def __init__(self, designatio, file_path=""):
         self.designatio = designatio
@@ -80,17 +82,18 @@ class Video:
             # infomation
             attributes = [e.string for e in soup.select(".header")]
             include = {
-                "designatio": '識別碼:' in attributes,
+                "designatio":   '識別碼:' in attributes,
                 "publish_date": '發行日期:' in attributes,
                 "video_length": '長度:' in attributes,
-                "director": '導演:' in attributes,
+                "director":     '導演:' in attributes,
                 "manufacturer": '製作商:' in attributes,
-                "publisher": '發行商:' in attributes,
-                "series": '系列:' in attributes,
-                "genres": '類別:' in attributes,
-                "actors": '演員' in attributes,
+                "publisher":    '發行商:' in attributes,
+                "series":       '系列:' in attributes,
+                "genres":       '類別:' in attributes,
+                "actors":       '演員' in attributes,
             }
 
+            # Attributes Extract lambda function
             extract = {
                 "designatio": lambda soup, i: i.select("span")[1].string,
                 "publish_date": lambda soup, i: str(i).split("</span> ")[1].rstrip("</p>"),
@@ -102,6 +105,7 @@ class Video:
                 "genres": lambda soup, i: [genre.string for genre in soup.select('a[href^="https://www.javbus.com/genre/"]')][2:],
                 "actors": lambda soup, i: [actor.a.string for actor in soup.select('span[onmouseout^="hoverdiv"]')],
             }
+
             info = soup.select(".info > p")
             idx = 0
 
@@ -112,7 +116,6 @@ class Video:
 
         except Exception:
             print("Video not recruited or require proxy: ", self.file_path)
-            self.is_updated = False
             return
         self.is_updated = True
 
@@ -121,51 +124,78 @@ class Video:
 
             dst_dir will be orignal file_dir by default
         '''
+
+        # Need pulling info
         if not self.is_updated:
-            return
+            return False
+
+        # User specify download dir
         if dst_dir is None:
             dst_dir = self.file_dir
+
         # Join path
         if len(self.actors) > 0:
-            img_path = os.path.join(dst_dir, '{:} {:}.jpg'.format(self.designatio, ' '.join(self.actors)))
+            img_path = os.path.join(dst_dir, '{:} {:}.jpg'.format(
+                self.designatio, ' '.join(self.actors)))
         else:
             img_path = os.path.join(dst_dir, '{:}.jpg'.format(self.designatio))
+
+        # Already exist or download dir not exist
         if not os.path.exists(dst_dir) or os.path.exists(img_path):
             return False
+
         # Proxy
         if use_proxy:
-            r = requests.get(self.cover_url, stream=True, proxies={"http": http_proxy})
+            r = requests.get(self.cover_url, stream=True,
+                             proxies={"http": http_proxy})
         else:
             r = requests.get(self.cover_url, stream=True)
+
         # Download
         if r.status_code == 200:
             with open(img_path, 'wb') as f:
                 for chunk in r:
                     f.write(chunk)
+        return True
 
     def rename(self, dst_dir=None):
         ''' rename video files by title
 
             dst_dir will be orignal file_dir by default
         '''
+
+        # Need pulling info
         if not self.is_updated:
-            return
+            return False
+
+        # User specify rename dir
         if dst_dir is None:
             dst_dir = self.file_dir
+
         # Join path
         if len(self.actors) > 0:
-            dst_path = os.path.join(dst_dir, '{:} {:}{:}'.format(self.designatio, ' '.join(self.actors), self.file_type))
+            dst_path = os.path.join(dst_dir, '{:} {:}{:}'.format(
+                self.designatio, ' '.join(self.actors), self.file_type))
         else:
-            dst_path = os.path.join(dst_dir, '{:}{:}'.format(self.designatio, self.file_type))
+            dst_path = os.path.join(dst_dir, '{:}{:}'.format(
+                self.designatio, self.file_type))
+
+        # Already exist or rename dir not exist
         if not os.path.exists(dst_dir) or os.path.exists(dst_path):
             return False
+
+        # Rename
         os.rename(self.file_path, dst_path)
+        self.file_path = dst_path
+        self.file_dir = os.path.dirname(dst_path)
+        self.file_name = os.path.basename(dst_path)
         return True
 
 
 def Extract_designatio(name):
     ''' Extract designatio from given name (string)
     '''
+
     match = re.match(r"([a-zA-Z]+[\-\_][0-9]+)", name)
     if match is None:
         return None
@@ -175,19 +205,24 @@ def Extract_designatio(name):
 def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}):
     ''' Search specify media type of video recursively in folder
     '''
+
     videos = []
     # walk folder
     list_dirs = os.walk(folder)
     for folder, _, files in list_dirs:
         for f in files:
             file_name = f.split('.')
+
             # exclude other type of file
             if len(file_name) <= 1 or file_name[-1].lower() not in media_suffix:
                 continue
+
             # extract
             designatio = Extract_designatio(f)
             if designatio is None:
                 continue
+
             # append in list
-            videos.append(Video(designatio=designatio, file_path=os.path.join(folder, f)))
+            v = Video(designatio=designatio, file_path=os.path.join(folder, f))
+            videos.append(v)
     return videos
