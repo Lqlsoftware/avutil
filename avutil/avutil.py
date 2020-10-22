@@ -25,6 +25,7 @@ class Video:
     series          = []
     genres          = []
     actors          = []
+    is_updated      = False
 
     def __init__(self, designatio, file_path=""):
         self.designatio = designatio
@@ -35,7 +36,10 @@ class Video:
             self.file_type = os.path.splitext(file_path)[1]
 
     def __str__(self):
-        return '''[文件 {0.file_path}]\n
+        if not self.is_updated:
+            return "[文件 {0.file_path}]".format(self)
+        else:
+            return '''[文件 {0.file_path}]\n
     标题\t{0.title}
     番号\t{0.designatio}
     发行日期\t{0.publish_date}
@@ -108,13 +112,17 @@ class Video:
 
         except Exception:
             print("Video not recruited or require proxy: ", self.file_path)
-            pass
+            self.is_updated = False
+            return
+        self.is_updated = True
 
     def download_cover(self, dst_dir=None, use_proxy=False, http_proxy="http://127.0.0.1:1087"):
         ''' download cover of video title
 
             dst_dir will be orignal file_dir by default
         '''
+        if not self.is_updated:
+            return
         if dst_dir is None:
             dst_dir = self.file_dir
         # Join path
@@ -137,6 +145,8 @@ class Video:
 
             dst_dir will be orignal file_dir by default
         '''
+        if not self.is_updated:
+            return
         if dst_dir is None:
             dst_dir = self.file_dir
         # Join path
