@@ -182,7 +182,7 @@ def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}):
         for f in files:
             file_name = f.split('.')
             # exclude other type of file
-            if len(file_name) <= 1 or file_name[-1] not in media_suffix:
+            if len(file_name) <= 1 or file_name[-1].lower() not in media_suffix:
                 continue
             # extract
             designatio = Extract_designatio(f)
