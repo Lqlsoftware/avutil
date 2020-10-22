@@ -106,8 +106,9 @@ class Video:
                     self.__setattr__(attr, extract[attr](soup, info[idx]))
                     idx += 1
 
-        except Exception as e:
-            raise Exception("Video Not Found or Require proxy", e)
+        except Exception:
+            print("Video not recruited or require proxy: ", self.file_path)
+            pass
 
     def download_cover(self, dst_dir=None, use_proxy=False, http_proxy="http://127.0.0.1:1087"):
         ''' download cover of video title
