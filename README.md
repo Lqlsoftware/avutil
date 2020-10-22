@@ -57,8 +57,7 @@ for video in videos:
     print(video)
 
     # Download cover image (as video.title + .jpg)
-    img_file = os.path.join(folder, video.title + ".jpg")
-    video.download_cover(os.path.join(img_file))
+    video.download_cover()
 ```
 
 (Or proxy supported!)
@@ -68,8 +67,7 @@ for video in videos:
     video.pull_info(use_proxy=True, http_proxy="http://127.0.0.1:1087")
     print(video)
     # Download cover image using proxy (as video.title + .jpg)
-    img_file = os.path.join(folder, video.title + ".jpg")
-    video.download_cover(os.path.join(img_file), use_proxy=True, http_proxy="http://127.0.0.1:1087")
+    video.download_cover(use_proxy=True, http_proxy="http://127.0.0.1:1087")
 ```
 
 Tidy up!
