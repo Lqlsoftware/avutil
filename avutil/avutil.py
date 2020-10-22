@@ -126,7 +126,10 @@ class Video:
         if dst_dir is None:
             dst_dir = self.file_dir
         # Join path
-        img_path = os.path.join(dst_dir, self.title + '.jpg')
+        if len(self.actors) > 0:
+            img_path = os.path.join(dst_dir, '{:} {:}.jpg'.format(self.designatio, ' '.join(self.actors)))
+        else:
+            img_path = os.path.join(dst_dir, '{:}.jpg'.format(self.designatio))
         if not os.path.exists(dst_dir) or os.path.exists(img_path):
             return False
         # Proxy
@@ -150,7 +153,10 @@ class Video:
         if dst_dir is None:
             dst_dir = self.file_dir
         # Join path
-        dst_path = os.path.join(dst_dir, self.title + self.file_type)
+        if len(self.actors) > 0:
+            dst_path = os.path.join(dst_dir, '{:} {:}{:}'.format(self.designatio, ' '.join(self.actors), self.file_type))
+        else:
+            dst_path = os.path.join(dst_dir, '{:}{:}'.format(self.designatio, self.file_type))
         if not os.path.exists(dst_dir) or os.path.exists(dst_path):
             return False
         os.rename(self.file_path, dst_path)
@@ -172,7 +178,7 @@ def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}):
     videos = []
     # walk folder
     list_dirs = os.walk(folder)
-    for folder, dirs, files in list_dirs:
+    for folder, _, files in list_dirs:
         for f in files:
             file_name = f.split('.')
             # exclude other type of file
