@@ -73,6 +73,6 @@ for video in videos:
 Tidy up!
 
 ```python
-    # Tidy up (rename to video.title)
+    # Tidy up (rename to video.designatio + video.actors)
     video.rename()
 ```
