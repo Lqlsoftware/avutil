@@ -1,12 +1,16 @@
 # AV Utils
 
-Provide some useful utils for tidying up your personal video folder
+[![Release](https://img.shields.io/pypi/v/avutil?color=%2366CCFF&label=release)](https://pypi.org/project/avutil/)
+
+Provide some useful utils for *tidying up* your personal video folder
 
 - Extract designatio
 - Search folder (recursively)
 - Pull video info (title, actors etc.)
 - Download cover image
 - Rename video file
+
+![gjf](https://github.com/Lqlsoftware/avutil/blob/main/doc/demo.gif)
 
 ## Environment
 
