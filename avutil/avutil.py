@@ -32,7 +32,7 @@ class Video:
 
     def __init__(self, designatio, file_path=""):
         self.base_url = self.encode()
-        self.designatio = designatio
+        self.designatio = designatio.upper()
         if file_path is not None:
             self.file_path = file_path
             self.file_dir = os.path.dirname(file_path)
