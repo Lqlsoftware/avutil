@@ -10,16 +10,17 @@ class Library:
     ''' Data source -- LIBRARY
     '''
     base_url = ""
+    search_prefix = ""
 
     def __init__(self):
-        self.base_url = encode(
-            "gsso9..vvv-i`ukhaq`qx-bnl.bm.uk^rd`qbgaxhc-ogo>jdxvnqc<")
+        self.base_url = encode("gsso9..vvv-i`ukhaq`qx-bnl.bm.")
+        self.search_prefix = encode("uk^rd`qbgaxhc-ogo>jdxvnqc<")
 
     def Get(self, designatio, use_proxy=False, http_proxy=None):
         result = {}
 
         # URL for searching designatio
-        URL = self.base_url + designatio
+        URL = self.base_url + self.search_prefix + designatio
 
         # Using requests
         headers = {
@@ -34,10 +35,26 @@ class Library:
             response = requests.get(URL, headers=headers)
 
         # parse html
-        response.iter_lines()
         soup = bs4.BeautifulSoup(response.content, features="html.parser")
 
-        # search title
+        # may be multiple search results
+        thumblist = soup.select_one(".videothumblist")
+        if thumblist is not None:
+            # No result
+            video = thumblist.select_one(".video > a")
+            if video is None:
+                raise Exception("Not recruited")
+            
+            # multiple result - choose the first one
+            URL = self.base_url + video['href']
+            if use_proxy:
+                response = requests.get(
+                    URL, proxies={"http": http_proxy}, headers=headers)
+            else:
+                response = requests.get(URL, headers=headers)
+            soup = bs4.BeautifulSoup(response.content, features="html.parser")
+
+        # video title
         result["title"] = soup.select_one(".post-title").getText()
 
         # cover image

@@ -6,6 +6,10 @@ from avutil.bus import Bus
 from avutil.library import Library
 
 
+def strip(string):
+    return re.sub(r"\/|\?|\*|\:|\||\\|\<|\>", "", string)
+
+
 class Video:
     ''' Describe details of an video which includes:
 
@@ -93,11 +97,19 @@ class Video:
             dst_dir = self.file_dir
 
         # Join path
-        if len(self.cast) > 0:
-            img_path = os.path.join(dst_dir, '{:} {:}.jpg'.format(
-                self.designatio, ' '.join(self.cast)))
+        if len(self.title.encode()) + 4 > 255:
+            overflow = len(self.title.encode()) + 4 - 255
+            idx = - overflow - 6
+            if len(self.cast) == 1:
+                idx = idx - len(self.cast[0]) - 1
+                img_path = os.path.join(dst_dir, '{:}.. {:}{:}'.format(
+                    strip(self.title[:idx]), self.cast[0], '.jpg'))
+            else:
+                img_path = os.path.join(dst_dir, '{:}..{:}'.format(
+                    strip(self.title[:idx]), '.jpg'))
         else:
-            img_path = os.path.join(dst_dir, '{:}.jpg'.format(self.designatio))
+            img_path = os.path.join(dst_dir, '{:}{:}'.format(
+                strip(self.title), '.jpg'))
 
         # Already exist or download dir not exist
         if not os.path.exists(dst_dir) or os.path.exists(img_path):
@@ -132,12 +144,19 @@ class Video:
             dst_dir = self.file_dir
 
         # Join path
-        if len(self.cast) > 0:
-            dst_path = os.path.join(dst_dir, '{:} {:}{:}'.format(
-                self.designatio, ' '.join(self.cast), self.file_type))
+        if len(self.title.encode()) + len(self.file_type) > 255:
+            overflow = len(self.title.encode()) + len(self.file_type) - 255
+            idx = - overflow - len(self.file_type) - 2
+            if len(self.cast) == 1:
+                idx = idx - len(self.cast[0]) - 1
+                dst_path = os.path.join(dst_dir, '{:}.. {:}{:}'.format(
+                    strip(self.title[:idx]), self.cast[0], self.file_type))
+            else:
+                dst_path = os.path.join(dst_dir, '{:}..{:}'.format(
+                    strip(self.title[:idx]), self.file_type))
         else:
             dst_path = os.path.join(dst_dir, '{:}{:}'.format(
-                self.designatio, self.file_type))
+                strip(self.title), self.file_type))
 
         # Already exist or rename dir not exist
         if not os.path.exists(dst_dir) or os.path.exists(dst_path):
