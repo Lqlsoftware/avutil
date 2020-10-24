@@ -1,1 +1,3 @@
-from avutil.avutil import *
+from avutil.video import *
+from avutil.bus import *
+from avutil.library import *

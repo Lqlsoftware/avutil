@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import argparse
-import avutil
 import pickle
+import avutil
+
 sys.setrecursionlimit(10000)
 
 

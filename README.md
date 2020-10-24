@@ -2,7 +2,8 @@
 
 [![Release](https://img.shields.io/pypi/v/avutil?color=%2366CCFF&label=release)](https://pypi.org/project/avutil/)
 
-Provide some useful utils for *tidying up* your personal video folder
+Provide some useful utils for *tidying up* your personal video folder.
+Data source from *LIBRARY* or *BUS*.
 
 - Extract designatio
 - Search folder (recursively)
@@ -27,13 +28,13 @@ pip install avutil
 ## Usage
 
 ```sh
-# tidyup -h
+$ tidyup -h
 ```
 
 Tidy up current dir
 
 ```sh
-# tidyup
+$ tidyup
 ```
 
 ## Usage in Python script
@@ -54,25 +55,21 @@ Or you can specify the extension type of video
 videos = Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"})
 ```
 
-Pull video info & download cover image
+Pull video info from *LIBRARY* by default & download cover image
 ```python
 for video in videos:
     # Pull video info
     video.pull_info()
-    print(video)
 
     # Download cover image (as video.title + .jpg)
     video.download_cover()
 ```
 
-(Or proxy supported!)
+It's okey using *BUS*
 ```python
 for video in videos:
-    # Pull video info using proxy
-    video.pull_info(use_proxy=True, http_proxy="http://127.0.0.1:1087")
-    print(video)
-    # Download cover image using proxy (as video.title + .jpg)
-    video.download_cover(use_proxy=True, http_proxy="http://127.0.0.1:1087")
+    # Pull video info
+    video.pull_info(source=avutil.Bus())
 ```
 
 Tidy up!
@@ -80,4 +77,17 @@ Tidy up!
 ```python
     # Tidy up (rename to video.designatio + video.actors)
     video.rename()
+```
+
+## Proxy
+
+Proxy is supported in avutil in two ways, you can define a global bash variable:
+```shell
+$ export ALL_PROXY="127.0.0.1:1087"
+```
+
+Or you can pass http-proxy in code
+```python
+video.pull_info(use_proxy=True, http_proxy="http://127.0.0.1:1087")
+video.download_cover(use_proxy=True, http_proxy="http://127.0.0.1:1087")
 ```
