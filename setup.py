@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="avutil",
-    version="1.0.4",
+    version="1.0.6",
     author="Everyone",
     description="Provide some useful utils for tidying up your AV folder",
     long_description=long_description,
@@ -18,7 +18,8 @@ setuptools.setup(
     ],
     python_requires='>=3.4.0',
     install_requires=[
-      'beautifulsoup4 >= 4.7.0'
+      'beautifulsoup4 >= 4.7.0',
+      'requests >= 2.21.0',
     ],
     entry_points={
         'console_scripts': [
