@@ -16,6 +16,7 @@ Provide some useful utils for *tidying up* your personal video folder
 
     Python >= 3.4
     BeautifulSoup4 >= 4.7.0
+    requests >= 2.21.0
 
 ## Install
 
