@@ -28,8 +28,10 @@ class Video:
     genres = []
     actors = []
     is_updated = False
+    base_url = "gsso9..vvv-i`uatr-bnl."
 
     def __init__(self, designatio, file_path=""):
+        self.base_url = self.encode()
         self.designatio = designatio
         if file_path is not None:
             self.file_path = file_path
@@ -53,6 +55,9 @@ class Video:
     类别\t{0.genres}
     演员\t{0.actors}\n'''.format(self)
 
+    def encode(self):
+        return "".join([chr((ord(rune) + 1 + 128) % 128) for rune in self.base_url])
+
     def pull_info(self, use_proxy=False, http_proxy="http://127.0.0.1:1087"):
         ''' Pull video details by designatio from JAVBUS (currently). 
 
@@ -62,7 +67,7 @@ class Video:
         '''
 
         # URL of JAVBUS searching designatio
-        URL = "http://www.javbus.com/" + self.designatio
+        URL = self.base_url + self.designatio
         try:
             # request library
             if use_proxy:
