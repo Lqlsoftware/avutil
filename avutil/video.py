@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import xml.etree.ElementTree as ET
 
 from avutil.bus import Bus
 from avutil.library import Library
@@ -28,6 +29,7 @@ class Video:
     designatio = ""
     title = ""
     cover_url = ""
+    video_url = ""
     date = ""
     length = ""
     director = ""
@@ -63,6 +65,18 @@ class Video:
     类别\t{0.genres}
     演员\t{0.cast}\n'''.format(self)
 
+    def __gen_file_name(self):
+        if len(self.title.encode()) > 251:
+            if len(self.cast) == 1:
+                overflow = 244 - len(self.title.encode()) - len(self.cast[0])
+                return "{:}.. {:}".format(self.title[:overflow], self.cast[0])
+            else:
+                overflow = 245 - len(self.title.encode())
+                return self.title[:overflow]
+
+        else:
+            return strip(self.title)
+
     def pull_info(self, source=Library(), use_proxy=False, http_proxy="http://127.0.0.1:1087"):
         ''' Pull video details by designatio from JAVBUS (currently). 
 
@@ -72,7 +86,7 @@ class Video:
 
             http_proxy is set to http://127.0.0.1:1087 by default
         '''
-
+        self.video_url = source.base_url + source.search_prefix + self.designatio
         try:
             attrs = source.Get(self.designatio, use_proxy, http_proxy)
             for name, value in attrs.items():
@@ -97,19 +111,8 @@ class Video:
             dst_dir = self.file_dir
 
         # Join path
-        if len(self.title.encode()) + 4 > 255:
-            overflow = len(self.title.encode()) + 4 - 255
-            idx = - overflow - 6
-            if len(self.cast) == 1:
-                idx = idx - len(self.cast[0]) - 1
-                img_path = os.path.join(dst_dir, '{:}.. {:}{:}'.format(
-                    strip(self.title[:idx]), self.cast[0], '.jpg'))
-            else:
-                img_path = os.path.join(dst_dir, '{:}..{:}'.format(
-                    strip(self.title[:idx]), '.jpg'))
-        else:
-            img_path = os.path.join(dst_dir, '{:}{:}'.format(
-                strip(self.title), '.jpg'))
+        img_path = os.path.join(dst_dir, "{:}{:}".format(
+            self.__gen_file_name(), ".jpg"))
 
         # Already exist or download dir not exist
         if not os.path.exists(dst_dir) or os.path.exists(img_path):
@@ -144,19 +147,8 @@ class Video:
             dst_dir = self.file_dir
 
         # Join path
-        if len(self.title.encode()) + len(self.file_type) > 255:
-            overflow = len(self.title.encode()) + len(self.file_type) - 255
-            idx = - overflow - len(self.file_type) - 2
-            if len(self.cast) == 1:
-                idx = idx - len(self.cast[0]) - 1
-                dst_path = os.path.join(dst_dir, '{:}.. {:}{:}'.format(
-                    strip(self.title[:idx]), self.cast[0], self.file_type))
-            else:
-                dst_path = os.path.join(dst_dir, '{:}..{:}'.format(
-                    strip(self.title[:idx]), self.file_type))
-        else:
-            dst_path = os.path.join(dst_dir, '{:}{:}'.format(
-                strip(self.title), self.file_type))
+        dst_path = os.path.join(dst_dir, "{:}{:}".format(
+            self.__gen_file_name(), self.file_type))
 
         # Already exist or rename dir not exist
         if not os.path.exists(dst_dir) or os.path.exists(dst_path):
@@ -168,6 +160,56 @@ class Video:
         self.file_dir = os.path.dirname(dst_path)
         self.file_name = os.path.basename(dst_path)
         return True
+
+    def save_info(self, dst_dir=None):
+        ''' Save video info as title.nfo
+
+            dst_dir will be orignal file_dir by default
+        '''
+
+        # Need pulling info
+        if not self.is_updated:
+            return False
+
+        # User specify rename dir
+        if dst_dir is None:
+            dst_dir = self.file_dir
+
+        # Join path
+        dst_path = os.path.join(dst_dir, "{:}{:}".format(self.__gen_file_name(), ".nfo"))
+
+        # Already exist or dst dir not exist
+        if not os.path.exists(dst_dir) or os.path.exists(dst_path):
+            return False
+
+        nfo_movie = ET.Element("movie")
+        ET.SubElement(nfo_movie, "title").text = self.title
+        ET.SubElement(nfo_movie, "set")
+        ET.SubElement(nfo_movie, "studio").text = self.maker
+        ET.SubElement(nfo_movie, "year").text = self.date[:4]
+        ET.SubElement(nfo_movie, "outline").text = self.title
+        ET.SubElement(nfo_movie, "plot").text = self.title
+        ET.SubElement(nfo_movie, "runtime").text = self.length[:-2]
+        ET.SubElement(nfo_movie, "director").text = self.director
+        ET.SubElement(nfo_movie, "poster").text = self.__gen_file_name() + ".jpg"
+        ET.SubElement(nfo_movie, "thumb").text = self.__gen_file_name() + ".jpg"
+        ET.SubElement(nfo_movie, "fanart").text = self.__gen_file_name() + ".jpg"
+        for actor in self.cast:
+            nfo_actor = ET.SubElement(nfo_movie, "actor")
+            ET.SubElement(nfo_actor, "name").text = actor
+        ET.SubElement(nfo_movie, "maker").text = self.maker
+        ET.SubElement(nfo_movie, "label").text = self.label
+        for genre in self.genres:
+            ET.SubElement(nfo_movie, "tag").text = genre
+        for genre in self.genres:
+            ET.SubElement(nfo_movie, "genre").text = genre
+        ET.SubElement(nfo_movie, "num").text = self.designatio
+        ET.SubElement(nfo_movie, "premiered").text = self.date
+        ET.SubElement(nfo_movie, "cover").text = self.cover_url
+        ET.SubElement(nfo_movie, "website").text = self.video_url
+
+        nfo = ET.ElementTree(nfo_movie)
+        nfo.write(dst_path, encoding="utf-8", xml_declaration=True)
 
 
 def Extract_designatio(name):

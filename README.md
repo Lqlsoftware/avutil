@@ -7,7 +7,7 @@ Data source from *LIBRARY* or *BUS*.
 
 - Extract designatio
 - Search folder (recursively)
-- Pull video info (title, actors etc.)
+- Pull & save video info (title, actors etc.)
 - Download cover image
 - Rename video file
 
@@ -70,6 +70,13 @@ It's okey using *BUS*
 for video in videos:
     # Pull video info
     video.pull_info(source=avutil.Bus())
+```
+
+Save video info as .nfo file
+```python
+for video in videos:
+    # Save video info
+    video.save_info()
 ```
 
 Tidy up!

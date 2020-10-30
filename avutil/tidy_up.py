@@ -12,8 +12,6 @@ def get_arguments(args=sys.argv[1:]):
         description="Tidy up your personal video dir")
     parser.add_argument("-d", "--dir", dest='dir', help="video dir")
     parser.add_argument("-o", "--out", dest='out', help="output dir")
-    parser.add_argument("-s", "--save", dest='save',
-                        help="save video info pkl")
     parser.add_argument("-p", "--proxy", dest='proxy',
                         help="http proxy address")
     return parser.parse_args(args)
@@ -32,12 +30,6 @@ def main():
         dst_folder = src_folder
     else:
         dst_folder = args.out
-
-    # args.save
-    if args.save == None:
-        pkl_save = None
-    else:
-        pkl_save = args.save
 
     # args.proxy
     if args.proxy == None:
@@ -62,10 +54,10 @@ def main():
 
             # Tidy up
             video.rename(dst_dir=dst_folder)
-        except Exception:
-            pass
 
-    # Save video info pkl
-    if pkl_save is not None:
-        with open(pkl_save, 'wb') as f:
-            pickle.dump(videos, f)
+
+            # Save video info as .nfo
+            video.save_info(dst_dir=dst_folder)
+        except Exception as e:
+            print("WARN:", e)
+            pass
