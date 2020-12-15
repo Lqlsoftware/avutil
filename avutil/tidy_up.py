@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import argparse
-import pickle
 import avutil
 
 sys.setrecursionlimit(10000)
@@ -54,7 +53,6 @@ def main():
 
             # Tidy up
             video.rename(dst_dir=dst_folder)
-
 
             # Save video info as .nfo
             video.save_info(dst_dir=dst_folder)
