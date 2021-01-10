@@ -76,5 +76,8 @@ class Library:
 
         info = soup.select_one("#video_info")
         for attr, func in extract.items():
-            result[attr] = func(info)
+            try:
+                result[attr] = func(info)
+            except Exception:
+                result[attr] = ""
         return result
