@@ -52,7 +52,7 @@ videos = avutil.Search_folder(folder)
 
 Or you can specify the extension type of video
 ```python
-videos = Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"})
+videos = avutil.Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"})
 ```
 
 Pull video info from *LIBRARY* by default & download cover image
@@ -88,9 +88,9 @@ Tidy up!
 
 ## Proxy
 
-Proxy is supported in avutil in two ways, you can define a global bash variable:
+Proxy is supported in avutil in two ways, you can define a global bash variable (eg. http proxy):
 ```shell
-$ export ALL_PROXY="127.0.0.1:1087"
+$ export ALL_PROXY="http://127.0.0.1:1087"
 ```
 
 Or you can pass http-proxy in code
