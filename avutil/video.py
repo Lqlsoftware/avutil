@@ -215,7 +215,14 @@ class Video:
 def Extract_designatio(name):
     ''' Extract designatio from given name (string)
     '''
+    # Remove video type
+    names = name.split('.')
+    if len(name) < 1:
+        name = names[0]
+    else:
+        name = ".".join(names[:-1])
 
+    # Re match
     match = re.match(r".*?([a-zA-Z]+[\-\_\s]*?[0-9]+)", name)
     if match is None:
         return None
