@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="avutil",
-    version="1.2.0",
+    version="1.2.1",
     author="Everyone",
     description="Provide some useful utils for tidying up your AV folder",
     long_description=long_description,
