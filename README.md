@@ -1,4 +1,4 @@
-# AV Utils
+# avutil
 
 [![Release](https://img.shields.io/pypi/v/avutil?color=%2366CCFF&label=release)](https://pypi.org/project/avutil/)
 
