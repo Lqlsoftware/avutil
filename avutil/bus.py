@@ -10,6 +10,7 @@ class Bus:
     ''' Data source -- BUS
     '''
     base_url = ""
+    search_prefix = ""
 
     def __init__(self):
         self.base_url = encode("gsso9..vvv-i`uatr-bnl.")
