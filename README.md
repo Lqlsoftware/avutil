@@ -90,7 +90,7 @@ Tidy up!
 
 Proxy is supported in avutil in two ways, you can define a global bash variable (eg. http proxy):
 ```shell
-$ export ALL_PROXY="http://127.0.0.1:1087"
+$ export HTTP_PROXY="http://127.0.0.1:1087"
 ```
 
 Or you can pass http-proxy in code

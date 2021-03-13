@@ -77,18 +77,16 @@ class Video:
         else:
             return strip(self.title)
 
-    def pull_info(self, source=Library(), use_proxy=False, http_proxy="http://127.0.0.1:1087"):
-        ''' Pull video details by designatio from JAVBUS (currently). 
+    def pull_info(self, source=Library(), http_proxy=None):
+        ''' Pull video details by designatio from source. 
 
             source is set to Library() by default
 
-            use_proxy is set to False by default
-
-            http_proxy is set to http://127.0.0.1:1087 by default
+            http_proxy is set to "" by default
         '''
         self.video_url = source.base_url + source.search_prefix + self.designatio
         try:
-            attrs = source.Get(self.designatio, use_proxy, http_proxy)
+            attrs = source.Get(self.designatio, http_proxy)
             for name, value in attrs.items():
                 self.__setattr__(name, value)
         except Exception:
@@ -96,7 +94,7 @@ class Video:
             return
         self.is_updated = True
 
-    def download_cover(self, dst_dir=None, use_proxy=False, http_proxy="http://127.0.0.1:1087"):
+    def download_cover(self, dst_dir=None, http_proxy=None):
         ''' download cover of video title
 
             dst_dir will be orignal file_dir by default
@@ -119,7 +117,7 @@ class Video:
             return False
 
         # Proxy
-        if use_proxy:
+        if http_proxy is not None:
             r = requests.get(self.cover_url, stream=True,
                              proxies={"http": http_proxy})
         else:

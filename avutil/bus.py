@@ -15,7 +15,7 @@ class Bus:
     def __init__(self):
         self.base_url = encode("gsso9..vvv-i`uatr-bnl.")
 
-    def Get(self, designatio, use_proxy=False, http_proxy=None):
+    def Get(self, designatio, http_proxy=None):
         result = {}
 
         # URL for searching designatio
@@ -27,7 +27,7 @@ class Bus:
             'Accept': 'text/event-stream',
             'Accept-Encoding': 'gzip'
         }
-        if use_proxy:
+        if http_proxy is not None:
             response = requests.get(URL, proxies={"http": http_proxy}, headers=headers)
         else:
             response = requests.get(URL, headers=headers)

@@ -16,7 +16,7 @@ class Library:
         self.base_url = encode("gsso9..vvv-i`ukhaq`qx-bnl.bm.")
         self.search_prefix = encode("uk^rd`qbgaxhc-ogo>jdxvnqc<")
 
-    def Get(self, designatio, use_proxy=False, http_proxy=None):
+    def Get(self, designatio, http_proxy=None):
         result = {}
 
         # URL for searching designatio
@@ -28,7 +28,7 @@ class Library:
             'Accept': 'text/event-stream',
             'Accept-Encoding': 'gzip'
         }
-        if use_proxy:
+        if http_proxy is not None:
             response = requests.get(
                 URL, proxies={"http": http_proxy}, headers=headers)
         else:
@@ -47,7 +47,7 @@ class Library:
             
             # multiple result - choose the first one
             URL = self.base_url + video['href']
-            if use_proxy:
+            if http_proxy is not None:
                 response = requests.get(
                     URL, proxies={"http": http_proxy}, headers=headers)
             else:

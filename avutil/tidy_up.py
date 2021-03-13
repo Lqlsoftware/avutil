@@ -32,10 +32,8 @@ def main():
 
     # args.proxy
     if args.proxy == None:
-        use_proxy = False
         http_proxy = ""
     else:
-        use_proxy = True
         http_proxy = args.proxy
 
     # Search folder
@@ -44,12 +42,11 @@ def main():
     for video in videos:
         try:
             # Pull AV info
-            video.pull_info(use_proxy=use_proxy, http_proxy=http_proxy)
+            video.pull_info(http_proxy=http_proxy)
             print(video)
 
             # Download cover
-            video.download_cover(dst_dir=dst_folder,
-                                 use_proxy=use_proxy, http_proxy=http_proxy)
+            video.download_cover(dst_dir=dst_folder, http_proxy=http_proxy)
 
             # Tidy up
             video.rename(dst_dir=dst_folder)
