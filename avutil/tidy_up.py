@@ -9,6 +9,7 @@ sys.setrecursionlimit(10000)
 def get_arguments(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         description="Tidy up your personal video dir")
+    parser.add_argument("-r", dest='recursive', action='store_true', help="search dir recursive")
     parser.add_argument("-d", "--dir", dest='dir', help="video dir")
     parser.add_argument("-o", "--out", dest='out', help="output dir")
     parser.add_argument("-p", "--proxy", dest='proxy',
@@ -37,7 +38,10 @@ def main():
         http_proxy = args.proxy
 
     # Search folder
-    videos = avutil.Search_folder(src_folder)
+    if args.recursive == True:
+        videos = avutil.Search_folder(src_folder, recursive=True)
+    else:
+        videos = avutil.Search_folder(src_folder)
 
     for video in videos:
         try:

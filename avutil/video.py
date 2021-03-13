@@ -227,13 +227,19 @@ def Extract_designatio(name):
     return match.groups()[0]
 
 
-def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}):
+def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}, recursive=False):
     ''' Search specify media type of video recursively in folder
     '''
 
     videos = []
-    # walk folder
-    list_dirs = os.walk(folder)
+    list_dirs = []
+    if recursive:
+        # walk folder
+        list_dirs = os.walk(folder)
+    else:
+        files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
+        list_dirs = [(folder, None, files)]
+
     for folder, _, files in list_dirs:
         for f in files:
             file_name = f.split('.')
