@@ -10,8 +10,8 @@ def get_arguments(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         description="Tidy up your personal video dir")
     parser.add_argument("-r", dest='recursive', action='store_true', help="search dir recursive")
-    parser.add_argument("-d", "--dir", dest='dir', help="video dir")
-    parser.add_argument("-o", "--out", dest='out', help="output dir")
+    parser.add_argument("-i", "--in", dest='_in', help="video dir")
+    parser.add_argument("-o", "--out", dest='_out', help="output dir")
     parser.add_argument("-p", "--proxy", dest='proxy',
                         help="http proxy address")
     return parser.parse_args(args)
@@ -20,16 +20,16 @@ def get_arguments(args=sys.argv[1:]):
 def main():
     args = get_arguments()
     # args.dir
-    if args.dir == None:
+    if args._in == None:
         src_folder = './'
     else:
-        src_folder = args.dir
+        src_folder = args._in
 
     # args.out
-    if args.out == None:
+    if args._out == None:
         dst_folder = src_folder
     else:
-        dst_folder = args.out
+        dst_folder = args._out
 
     # args.proxy
     if args.proxy == None:
