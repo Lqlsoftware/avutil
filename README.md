@@ -88,13 +88,13 @@ Tidy up!
 
 ## Proxy
 
-Proxy is supported in avutil in two ways, you can define a global bash variable (eg. http proxy):
+Proxy is supported in avutil in two ways, you can either define a global bash variable (eg. http proxy):
 ```shell
 $ export HTTP_PROXY="http://127.0.0.1:1087"
 ```
 
-Or you can pass http-proxy in code
+Or pass http-proxy in code
 ```python
-video.pull_info(use_proxy=True, http_proxy="http://127.0.0.1:1087")
-video.download_cover(use_proxy=True, http_proxy="http://127.0.0.1:1087")
+video.pull_info(http_proxy="http://127.0.0.1:1087")
+video.download_cover(http_proxy="http://127.0.0.1:1087")
 ```
