@@ -20,25 +20,26 @@ class Video:
     is_updated = False
 
     # File attributes
-    file_dir = ""
+    file_dir  = ""
     file_name = ""
     file_path = ""
     file_type = ""
 
     # Video attributes
-    designatio = ""
-    title = ""
-    cover_url = ""
-    video_url = ""
-    date = ""
-    length = ""
-    director = ""
-    maker = ""
-    label = ""
-    review = ""
-    series = []
-    genres = []
-    cast = []
+    designatio  = ""
+    title       = ""
+    subtitle    = False
+    cover_url   = ""
+    video_url   = ""
+    date        = ""
+    length      = ""
+    director    = ""
+    maker       = ""
+    label       = ""
+    review      = ""
+    series      = []
+    genres      = []
+    cast        = []
 
     def __init__(self, designatio, file_path=""):
         self.designatio = designatio.upper()
@@ -93,6 +94,8 @@ class Video:
         except Exception:
             print("Video not recruited or require proxy: ", self.file_path)
             return
+        if self.subtitle:
+            self.genres.append("中文字幕")
         self.is_updated = True
 
     def download_cover(self, dst_dir=None, http_proxy=None):
