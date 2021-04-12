@@ -3,24 +3,20 @@ import re
 
 from avutil.video import Video
 
-def Extract_designatio(name):
+def Extract_designatio(file_name):
     ''' Extract designatio from given name (string)
     '''
     # Remove video type
-    names = name.split('.')
-    if len(name) < 1:
-        name = names[0]
-    else:
-        name = ".".join(names[:-1])
+    file_name = os.path.splitext(file_name)[0]
 
     # Re match
-    match = re.match(r".*?([a-zA-Z]+[\-\_\s]*?[0-9]+)", name)
+    match = re.match(r".*?([a-zA-Z]+[\-\_\s]*?[0-9]+)", file_name)
     if match is None:
         return None
     return match.groups()[0]
 
 
-def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}, recursive=False):
+def Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mkv"}, recursive=False):
     ''' Search specify media type of video recursively in folder
     '''
 
@@ -35,14 +31,14 @@ def Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"}, recursive=F
 
     for folder, _, files in list_dirs:
         for f in files:
-            file_name = f.split('.')
+            file_name = os.path.splitext(f)
 
             # exclude other type of file
-            if len(file_name) <= 1 or file_name[-1].lower() not in media_suffix:
+            if file_name[1].lower() not in media_suffix:
                 continue
 
             # info already saved
-            if os.path.exists(os.path.join(folder, ".".join(file_name[:-1]) + ".nfo")):
+            if os.path.exists(os.path.join(folder, file_name[0] + ".nfo")):
                 continue
 
             # extract

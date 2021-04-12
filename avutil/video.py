@@ -44,9 +44,10 @@ class Video:
         self.designatio = designatio.upper()
         if file_path is not None:
             self.file_path = file_path
-            self.file_dir = os.path.dirname(file_path)
+            self.file_dir  = os.path.dirname (file_path)
             self.file_name = os.path.basename(file_path)
             self.file_type = os.path.splitext(file_path)[1]
+            self.subtitle  = os.path.splitext(file_path)[0].endswith("C")
 
     def __str__(self):
         if not self.is_updated:
