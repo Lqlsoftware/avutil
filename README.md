@@ -52,7 +52,7 @@ videos = avutil.Search_folder(folder)
 
 Or you can specify the extension type of video
 ```python
-videos = avutil.Search_folder(folder, media_suffix={"mp4", "wmv", "avi", "mkv"})
+videos = avutil.Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mkv"})
 ```
 
 Pull video info from *LIBRARY* by default & download cover image
