@@ -29,6 +29,17 @@ pip install avutil
 
 ```sh
 $ tidyup -h
+usage: tidyup [-h] [-r] [-i _IN] [-o _OUT] [-p PROXY]
+
+Tidy up your personal video dir
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r                    search dir recursive
+  -i _IN, --in _IN      video dir
+  -o _OUT, --out _OUT   output dir
+  -p PROXY, --proxy PROXY
+                        http proxy address
 ```
 
 Tidy up current dir
