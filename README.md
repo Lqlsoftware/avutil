@@ -2,7 +2,7 @@
 
 [![Release](https://img.shields.io/pypi/v/avutil?color=%2366CCFF&label=release)](https://pypi.org/project/avutil/)
 
-Provide some useful utils for *tidying up* your personal video folder.
+Provide some useful util functions (and a poweful tool `tidyup`) for *tidying up* your personal video folder.
 Data source from *LIBRARY* or *BUS*.
 
 - Extract designatio
@@ -25,7 +25,7 @@ Data source from *LIBRARY* or *BUS*.
 pip install avutil
 ```
 
-## Usage
+## Usage of tidyup
 
 ```sh
 $ tidyup -h
@@ -50,7 +50,7 @@ Tidy up current dir
 $ tidyup
 ```
 
-## Usage in Python script
+## Python script usage
 
 Import avutil:
 ```python
@@ -101,13 +101,12 @@ Tidy up!
 
 ## Proxy
 
-Proxy is supported in avutil in two ways, you can either define a global bash variable (eg. http proxy):
-```shell
-$ export HTTP_PROXY="http://127.0.0.1:1087"
-```
-
-Or pass http-proxy in code
+Proxy is supported in avutil in two ways, you can either pass http-proxy in code
 ```python
 video.pull_info(http_proxy="http://127.0.0.1:1087")
 video.download_cover(http_proxy="http://127.0.0.1:1087")
+```
+Or define a global bash variable (eg. http proxy):
+```shell
+$ export HTTP_PROXY="http://127.0.0.1:1087"
 ```
