@@ -11,10 +11,12 @@ class Bus:
     '''
     base_url = encode("gsso9..vvv-i`uatr-bnl.")
     search_prefix = ""
+    http_proxy = ""
 
-    def __init__(self):
+    def __init__(self, http_proxy=""):
+        self.http_proxy = http_proxy
 
-    def Get(self, designatio, http_proxy=None):
+    def Get(self, designatio):
         result = {}
 
         # URL for searching designatio
@@ -26,10 +28,7 @@ class Bus:
             'Accept': 'text/event-stream',
             'Accept-Encoding': 'gzip'
         }
-        if http_proxy is not None:
-            response = requests.get(URL, proxies={"http": http_proxy}, headers=headers)
-        else:
-            response = requests.get(URL, headers=headers)
+        response = requests.get(URL, proxies={"http": self.http_proxy}, headers=headers)
 
         # parse html
         soup = bs4.BeautifulSoup(response.content, features="html.parser")

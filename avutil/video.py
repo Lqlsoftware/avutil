@@ -79,16 +79,17 @@ class Video:
         else:
             return strip(self.title)
 
-    def pull_info(self, source=Library(), http_proxy=None):
+    def pull_info(self, source=Library, http_proxy=""):
         ''' Pull video details by designatio from source. 
 
             source is set to Library() by default
 
             http_proxy is set to "" by default
         '''
+        source = source(http_proxy=http_proxy)
         self.video_url = source.base_url + source.search_prefix + self.designatio
         try:
-            attrs = source.Get(self.designatio, http_proxy)
+            attrs = source.Get(self.designatio)
             for name, value in attrs.items():
                 self.__setattr__(name, value)
         except Exception:
@@ -98,7 +99,7 @@ class Video:
             self.genres.append("中文字幕")
         self.is_updated = True
 
-    def download_cover(self, dst_dir=None, http_proxy=None):
+    def download_cover(self, dst_dir=None, http_proxy=""):
         ''' download cover of video title
 
             dst_dir will be orignal file_dir by default
@@ -121,11 +122,7 @@ class Video:
             return False
 
         # Proxy
-        if http_proxy is not None:
-            r = requests.get(self.cover_url, stream=True,
-                             proxies={"http": http_proxy})
-        else:
-            r = requests.get(self.cover_url, stream=True)
+        r = requests.get(self.cover_url, stream=True, proxies={"http": http_proxy})
 
         # Download
         if r.status_code == 200:

@@ -11,14 +11,16 @@ class Library:
     '''
     base_url = encode("gsso9..vvv-i`ukhaq`qx-bnl.bm.")
     search_prefix = encode("uk^rd`qbgaxhc-ogo>jdxvnqc<")
+    http_proxy = ""
+    def __init__(self, http_proxy=""):
+        self.http_proxy = http_proxy
 
-    def __init__(self):
 
-    def Get(self, designatio, http_proxy=None):
+    def Get(self, designatio):
         result = {}
 
         # URL for searching designatio
-        URL = self.base_url + self.search_prefix + designatio
+        URL = Library.base_url + Library.search_prefix + designatio
 
         # Using requests
         headers = {
@@ -26,11 +28,7 @@ class Library:
             'Accept': 'text/event-stream',
             'Accept-Encoding': 'gzip'
         }
-        if http_proxy is not None:
-            response = requests.get(
-                URL, proxies={"http": http_proxy}, headers=headers)
-        else:
-            response = requests.get(URL, headers=headers)
+        response = requests.get(URL, proxies={"http": self.http_proxy}, headers=headers)
 
         # parse html
         soup = bs4.BeautifulSoup(response.content, features="html.parser")
@@ -44,12 +42,8 @@ class Library:
                 raise Exception("Not recruited")
             
             # multiple result - choose the first one
-            URL = self.base_url + video['href']
-            if http_proxy is not None:
-                response = requests.get(
-                    URL, proxies={"http": http_proxy}, headers=headers)
-            else:
-                response = requests.get(URL, headers=headers)
+            URL = Library.base_url + video['href']
+            response = requests.get(URL, proxies={"http": self.http_proxy}, headers=headers)
             soup = bs4.BeautifulSoup(response.content, features="html.parser")
 
         # video title

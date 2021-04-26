@@ -80,7 +80,7 @@ It's okey using *BUS*
 ```python
 for video in videos:
     # Pull video info
-    video.pull_info(source=avutil.Bus())
+    video.pull_info(source=avutil.Bus)
 ```
 
 Save video info as .nfo file
