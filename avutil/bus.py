@@ -9,11 +9,10 @@ def encode(url):
 class Bus:
     ''' Data source -- BUS
     '''
-    base_url = ""
+    base_url = encode("gsso9..vvv-i`uatr-bnl.")
     search_prefix = ""
 
     def __init__(self):
-        self.base_url = encode("gsso9..vvv-i`uatr-bnl.")
 
     def Get(self, designatio, http_proxy=None):
         result = {}

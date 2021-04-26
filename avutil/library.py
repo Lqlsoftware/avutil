@@ -9,12 +9,10 @@ def encode(url):
 class Library:
     ''' Data source -- LIBRARY
     '''
-    base_url = ""
-    search_prefix = ""
+    base_url = encode("gsso9..vvv-i`ukhaq`qx-bnl.bm.")
+    search_prefix = encode("uk^rd`qbgaxhc-ogo>jdxvnqc<")
 
     def __init__(self):
-        self.base_url = encode("gsso9..vvv-i`ukhaq`qx-bnl.bm.")
-        self.search_prefix = encode("uk^rd`qbgaxhc-ogo>jdxvnqc<")
 
     def Get(self, designatio, http_proxy=None):
         result = {}
