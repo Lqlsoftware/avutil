@@ -12,9 +12,35 @@ class Library:
     base_url = encode("gsso9..vvv-i`ukhaq`qx-bnl.bm.")
     search_prefix = encode("uk^rd`qbgaxhc-ogo>jdxvnqc<")
     http_proxy = ""
+    url_accessible = False
+
     def __init__(self, http_proxy=""):
         self.http_proxy = http_proxy
+        self.__check_url()
 
+    def __check_url(self):
+        if Library.url_accessible:
+            return
+        # Protect by Cloudflare or Proxy required
+        try:
+            response = requests.get(Library.base_url, proxies={"http": self.http_proxy})
+            if response.text.find("Cloudflare") != -1:
+                raise Exception()
+        except Exception:
+            # Get new base_url
+            URL = encode("gssor9..vvv-da`x-bnl.trq.i`ukhaq`qx")
+            response = requests.get(URL, proxies={"http": self.http_proxy})
+
+            # Search the page
+            soup = bs4.BeautifulSoup(response.content, features="html.parser")
+            new_url = soup.find("h2", attrs={"class": "bio inline_value"})
+            if new_url is None:
+                raise Exception("Proxy required")
+
+            # New base_url
+            new_url = new_url.getText().split()[1]
+            Library.base_url = "http://%s.com/cn/" % new_url
+            Library.url_accessible = True
 
     def Get(self, designatio):
         result = {}
