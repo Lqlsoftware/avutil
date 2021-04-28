@@ -40,7 +40,7 @@ class Library:
             # New base_url
             new_url = new_url.getText().split()[1]
             Library.base_url = "http://%s.com/cn/" % new_url
-            Library.url_accessible = True
+        Library.url_accessible = True
 
     def Get(self, designatio):
         result = {}
