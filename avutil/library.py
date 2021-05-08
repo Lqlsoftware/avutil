@@ -1,5 +1,10 @@
+import io
+import re
+import PIL
+
 import requests
 import bs4
+import pytesseract
 
 
 def encode(url):
@@ -27,18 +32,16 @@ class Library:
             if response.text.find("Cloudflare") != -1:
                 raise Exception()
         except Exception:
-            # Get new base_url
-            URL = encode("gssor9..vvv-da`x-bnl.trq.i`ukhaq`qx")
+            # Get new base_url gif
+            URL = encode("gsso9..ykhay-bnl.sdws-fhe")
             response = requests.get(URL, proxies={"http": self.http_proxy})
+            image = PIL.Image.open(io.BytesIO(response.content))
 
-            # Search the page
-            soup = bs4.BeautifulSoup(response.content, features="html.parser")
-            new_url = soup.find("h2", attrs={"class": "bio inline_value"})
-            if new_url is None:
-                raise Exception("Proxy required")
+            # Get base_url by OCR
+            new_url = pytesseract.image_to_string(image)
+            new_url = re.sub("([^a-z0-9]*)", "", new_url)
 
             # New base_url
-            new_url = new_url.getText().split()[1]
             Library.base_url = "http://%s.com/cn/" % new_url
         Library.url_accessible = True
 
