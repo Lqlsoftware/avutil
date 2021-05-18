@@ -18,9 +18,11 @@ def Extract_designatio(file_name):
 
 def Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mkv"}, recursive=False):
     ''' Search specify media type of video recursively in folder
+
+        return map{ designatio -> [file_path] }
     '''
 
-    videos = []
+    videos = {}
     list_dirs = []
     if recursive:
         # walk folder
@@ -46,7 +48,7 @@ def Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mkv"}, recursi
             if designatio is None:
                 continue
 
-            # append in list
-            v = Video(designatio=designatio, file_path=os.path.join(folder, f))
-            videos.append(v)
+            if designatio not in videos:
+                videos[designatio] = []
+            videos[designatio].append(os.path.join(folder, f))
     return videos

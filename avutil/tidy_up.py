@@ -54,8 +54,10 @@ def main():
     else:
         source = avutil.Library
 
-    for video in videos:
+    for designatio, file_paths in videos.items():
         try:
+            video = avutil.Video(designatio, file_paths)
+
             # Pull AV info
             video.pull_info(source=source, http_proxy=http_proxy)
             print(video)

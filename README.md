@@ -61,6 +61,7 @@ Search folder recursively to find videos:
 ```python
 folder = "StudyResource"
 videos = avutil.Search_folder(folder)
+# videos: map { designatio -> [ slice_paths ] }
 ```
 
 Or you can specify the extension type of video
@@ -70,7 +71,9 @@ videos = avutil.Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mk
 
 Pull video info from *LIBRARY* by default & download cover image
 ```python
-for video in videos:
+for designatio, file_paths in videos.items():
+    video = avutil.Video(designatio, file_paths)
+
     # Pull video info
     video.pull_info()
 
@@ -80,14 +83,12 @@ for video in videos:
 
 It's okey using *BUS*
 ```python
-for video in videos:
     # Pull video info
     video.pull_info(source=avutil.Bus)
 ```
 
 Save video info as .nfo file
 ```python
-for video in videos:
     # Save video info
     video.save_info()
 ```
