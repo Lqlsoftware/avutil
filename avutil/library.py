@@ -66,12 +66,15 @@ class Library:
         thumblist = soup.select_one(".videothumblist")
         if thumblist is not None:
             # No result
-            video = thumblist.select_one(".video > a")
+            video = thumblist.select(".video > a")
             if video is None:
                 raise Exception("Not recruited")
             
-            # multiple result - choose the first one
-            URL = Library.base_url + video['href']
+            # multiple result - choose the last one
+            if video[0]['title'].endswith("（BOD）"):
+                video = video[1:]
+
+            URL = Library.base_url + video[0]['href']
             response = requests.get(URL, proxies={"http": self.http_proxy}, headers=headers)
             soup = bs4.BeautifulSoup(response.content, features="html.parser")
 
