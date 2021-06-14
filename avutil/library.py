@@ -38,7 +38,7 @@ class Library:
             image = PIL.Image.open(io.BytesIO(response.content))
 
             # Get base_url by OCR
-            new_url = pytesseract.image_to_string(image)
+            new_url = pytesseract.image_to_string(image, lang="snum+eng")
             new_url = re.sub("([^a-z0-9]*)", "", new_url)
 
             # New base_url
@@ -71,7 +71,7 @@ class Library:
                 raise Exception("Not recruited")
             
             # multiple result - choose the last one
-            if video[0]['title'].endswith("（BOD）"):
+            if video[0]['title'].endswith("（BOD）") or video[0]['title'].endswith("（ブルーレイディスク）"):
                 video = video[1:]
 
             URL = Library.base_url + video[0]['href']
