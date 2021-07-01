@@ -3,6 +3,8 @@ import sys
 import argparse
 import avutil
 
+from multiprocessing import Pool
+
 sys.setrecursionlimit(10000)
 
 
@@ -19,10 +21,41 @@ def get_arguments(args=sys.argv[1:]):
         help="http proxy address")
     parser.add_argument("-s", "--source", dest='source',
         help="data source of video info, 'library' or 'bus'")
+    parser.add_argument("-t", "--thread", dest='thread',
+        help="threads num, use multi-threads to download info & images")
+    parser.add_argument("--with-poster", dest='with_poster', action='store_true',
+        help="save poster")
     return parser.parse_args(args)
 
+def VideoProcess(info):
+    designatio, file_paths = info
+    try:
+        video = avutil.Video(designatio, file_paths)
+
+        # Pull AV info
+        video.pull_info(source=source, http_proxy=http_proxy)
+        print(video.title)
+
+        # Download cover
+        video.download_cover(dst_dir=dst_folder, http_proxy=http_proxy, with_poster=with_poster)
+
+        # Tidy up
+        video.rename(dst_dir=dst_folder)
+
+        # Save video info as .nfo
+        video.save_info(dst_dir=dst_folder)
+    except Exception as e:
+        print("WARN:", e)
+        pass
 
 def main():
+    
+    global src_folder
+    global dst_folder
+    global http_proxy
+    global source
+    global with_poster
+
     args = get_arguments()
     # args.dir
     if args.IN is None:
@@ -54,22 +87,17 @@ def main():
     else:
         source = avutil.Library
 
-    for designatio, file_paths in videos.items():
-        try:
-            video = avutil.Video(designatio, file_paths)
+    # Gen poster
+    if args.with_poster == True:
+        with_poster = True
+    else:
+        with_poster = False
 
-            # Pull AV info
-            video.pull_info(source=source, http_proxy=http_proxy)
-            print(video)
+    # Threads num
+    if args.thread is None:
+        thread = 8
+    else:
+        thread = int(args.thread)
 
-            # Download cover
-            video.download_cover(dst_dir=dst_folder, http_proxy=http_proxy)
-
-            # Tidy up
-            video.rename(dst_dir=dst_folder)
-
-            # Save video info as .nfo
-            video.save_info(dst_dir=dst_folder)
-        except Exception as e:
-            print("WARN:", e)
-            pass
+    pool = Pool(thread)
+    pool.map(VideoProcess, videos.items())

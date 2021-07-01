@@ -29,7 +29,7 @@ pip install avutil
 
 ```sh
 $ tidyup -h
-usage: tidyup [-h] [-r] [-i IN] [-o OUT] [-p PROXY] [-s SOURCE]
+usage: tidyup [-h] [-r] [-i IN] [-o OUT] [-p PROXY] [-s SOURCE] [-t THREAD] [--with-poster]
 
 Tidy up your personal video dir
 
@@ -42,6 +42,9 @@ optional arguments:
                         http proxy address
   -s SOURCE, --source SOURCE
                         data source of video info, 'library' or 'bus'
+  -t THREAD, --thread THREAD
+                        threads num, use multi-threads to download info & images
+  --with-poster         save poster
 ```
 
 Tidy up current dir
