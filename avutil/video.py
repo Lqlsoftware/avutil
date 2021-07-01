@@ -32,37 +32,33 @@ class Video:
         'designatio' 'title' 'cover_url' 'date' 'length'
         'director' 'maker' 'label' 'genres' 'cast'
     '''
-    is_updated = False
-
-    # File attributes
-    file_path = []
-    slices    = 0
-
-    # Video attributes
-    designatio  = ""
-    title       = ""
-    subtitle    = False
-    cover_url   = ""
-    video_url   = ""
-    date        = ""
-    length      = ""
-    director    = ""
-    maker       = ""
-    label       = ""
-    review      = ""
-    series      = []
-    genres      = []
-    cast        = []
 
     def __init__(self, designatio, file_paths=[]):
-        self.designatio = designatio.upper()
-        self.slices     = len(file_paths)
-        self.file_path  = []
-
+        self.is_updated = False
+        # File attributes
+        self.slices      = len(file_paths)
+        self.file_path   = []
         file_paths      = sorted(file_paths)
         for path in file_paths:
             self.file_path.append(File(path))
             self.subtitle = os.path.splitext(path)[0].endswith("C")
+
+        # Video attributes
+        self.designatio  = designatio.upper()
+        self.title       = ""
+        self.outline     = ""
+        self.subtitle    = False
+        self.cover_url   = ""
+        self.video_url   = ""
+        self.date        = ""
+        self.length      = ""
+        self.director    = ""
+        self.maker       = ""
+        self.label       = ""
+        self.review      = ""
+        self.series      = []
+        self.genres      = []
+        self.cast        = []
 
     def __str__(self):
         ret = "[文件 {0}]".format(
@@ -82,7 +78,8 @@ class Video:
     评分\t{0.review}
     系列\t{0.series}
     类别\t{0.genres}
-    演员\t{0.cast}\n'''.format(self)
+    演员\t{0.cast}
+    简介\t{0.outline}\n'''.format(self)
 
     def __gen_file_name(self):
         if len(self.title.encode()) > 251:
@@ -219,8 +216,8 @@ class Video:
         ET.SubElement(nfo_movie, "set")
         ET.SubElement(nfo_movie, "studio").text = self.maker
         ET.SubElement(nfo_movie, "year").text = self.date[:4]
-        ET.SubElement(nfo_movie, "outline").text = self.title
-        ET.SubElement(nfo_movie, "plot").text = self.title
+        ET.SubElement(nfo_movie, "outline").text = self.outline
+        ET.SubElement(nfo_movie, "plot").text = self.outline
         ET.SubElement(nfo_movie, "runtime").text = self.length[:-2]
         ET.SubElement(nfo_movie, "director").text = self.director
         ET.SubElement(nfo_movie, "poster").text = self.__gen_file_name() + ".jpg"

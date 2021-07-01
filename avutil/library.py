@@ -85,6 +85,15 @@ class Library:
         result["cover_url"] = "http:" + \
             soup.select_one("#video_jacket_img")["src"]
 
+        # outline <Airav>
+        try:
+            airav_URL = encode("gssor9..vvv-`hq`u-vhjh.uhcdn.") + designatio
+            outline_rep = requests.get(airav_URL, proxies={"http": self.http_proxy}, headers=headers)
+            airav_soup = bs4.BeautifulSoup(outline_rep.content, features="html.parser")
+            result["outline"] = airav_soup.select_one(".synopsis > p").string
+        except:
+            pass
+
         # Attributes Extract lambda function
         extract = {
             "designatio": lambda s: s.select_one("#video_id .text").getText(),

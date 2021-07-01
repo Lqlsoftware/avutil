@@ -39,6 +39,15 @@ class Bus:
         # cover image
         result["cover_url"] = soup.select_one(".bigImage")["href"]
 
+        # outline <Airav>
+        try:
+            airav_URL = encode("gssor9..vvv-`hq`u-vhjh.uhcdn.") + designatio
+            outline_rep = requests.get(airav_URL, proxies={"http": self.http_proxy}, headers=headers)
+            airav_soup = bs4.BeautifulSoup(outline_rep.content, features="html.parser")
+            result["outline"] = airav_soup.select_one(".synopsis > p").string
+        except:
+            pass
+
         # infomation
         attributes = [e.string for e in soup.select(".header")]
         include = {
