@@ -155,19 +155,17 @@ class Video:
         # Already exist or download dir not exist
         if not os.path.exists(dst_dir):
             return False
-        for idx in range(self.slices):
-            if os.path.exists(dsts[idx]):
-                return False
+        if not os.path.exists(dsts[0]):
+            # Proxy
+            r = requests.get(self.cover_url, stream=True, proxies={"http": http_proxy})
 
-        # Proxy
-        r = requests.get(self.cover_url, stream=True, proxies={"http": http_proxy})
-
-        # Download
-        if r.status_code == 200:
-            with open(dsts[0], 'wb') as f:
-                for chunk in r:
-                    f.write(chunk)
+            # Download
+            if r.status_code == 200:
+                with open(dsts[0], 'wb') as f:
+                    for chunk in r:
+                        f.write(chunk)
         
+        # Copy for each slice
         for idx in range(1, self.slices):
             if not os.path.exists(dsts[idx]):
                 shutil.copyfile(dsts[0], dsts[idx])
