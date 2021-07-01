@@ -1,8 +1,9 @@
-import enum
 import os
+import shutil
 import re
 import requests
 import xml.etree.ElementTree as ET
+import PIL
 
 from avutil.bus import Bus
 from avutil.library import Library
@@ -38,6 +39,10 @@ class Video:
         # File attributes
         self.slices      = len(file_paths)
         self.file_path   = []
+        self.dst_path    = []
+        self.fanart      = []
+        self.poster      = []
+        self.thumb       = []
         file_paths      = sorted(file_paths)
         for path in file_paths:
             self.file_path.append(File(path))
@@ -84,10 +89,10 @@ class Video:
     def __gen_file_name(self):
         if len(self.title.encode()) > 251:
             if len(self.cast) == 1:
-                overflow = 243 - len(self.title.encode()) - len(self.cast[0])
+                overflow = 233 - len(self.title.encode()) - len(self.cast[0])
                 return "{:}.. {:}".format(self.title[:overflow], self.cast[0])
             else:
-                overflow = 244 - len(self.title.encode())
+                overflow = 234 - len(self.title.encode())
                 return self.title[:overflow]
 
         else:
@@ -114,9 +119,20 @@ class Video:
             return
         if self.subtitle:
             self.genres.append("中文字幕")
+      
+        # Join path (slices)
+        if self.slices > 1:
+            for idx in range(self.slices):
+                self.dst_path.append("{:} {:}".format(
+                    self.__gen_file_name(),
+                    chr(ord("A") + idx)
+                ))
+        else:
+            self.dst_path.append(self.__gen_file_name())
+
         self.is_updated = True
 
-    def download_cover(self, dst_dir=None, http_proxy=""):
+    def download_cover(self, dst_dir=None, http_proxy="", with_poster=False):
         ''' download cover of video title
 
             dst_dir will be orignal file_dir by default
@@ -131,21 +147,55 @@ class Video:
             dst_dir = "./"
 
         # Join path
-        img_path = os.path.join(dst_dir, "{:}{:}".format(
-            self.__gen_file_name(), ".jpg"))
+        dsts = []
+        for idx in range(self.slices):
+            dsts.append(os.path.join(dst_dir, self.dst_path[idx] + "-fanart.jpg"))
+        self.fanart = dsts
 
         # Already exist or download dir not exist
-        if not os.path.exists(dst_dir) or os.path.exists(img_path):
+        if not os.path.exists(dst_dir):
             return False
+        for idx in range(self.slices):
+            if os.path.exists(dsts[idx]):
+                return False
 
         # Proxy
         r = requests.get(self.cover_url, stream=True, proxies={"http": http_proxy})
 
         # Download
         if r.status_code == 200:
-            with open(img_path, 'wb') as f:
+            with open(dsts[0], 'wb') as f:
                 for chunk in r:
                     f.write(chunk)
+        
+        for idx in range(1, self.slices):
+            if not os.path.exists(dsts[idx]):
+                shutil.copyfile(dsts[0], dsts[idx])
+
+        # Poster cut
+        self.poster = [e for e in self.fanart]
+        self.thumb = [e for e in self.fanart]
+        if with_poster:
+            try:
+                for idx in range(self.slices):
+                    thumb_file = os.path.join(dst_dir, self.dst_path[idx] + "-thumb.jpg")
+                    if not os.path.exists(thumb_file):
+                        shutil.copyfile(dsts[0], thumb_file)
+                        self.thumb[idx] = thumb_file
+
+                poster_file = os.path.join(dst_dir, self.dst_path[0] + "-poster.jpg")
+                img = PIL.Image.open(dsts[0])
+                if not os.path.exists(poster_file):
+                    img.crop((img.width / 1.9, 0, img.width, img.height)).save(poster_file)
+                    self.poster[0] = poster_file
+
+                for idx in range(1, self.slices):
+                    poster_file = os.path.join(dst_dir, self.dst_path[idx] + "-poster.jpg")
+                    if not os.path.exists(poster_file):
+                        shutil.copyfile(self.poster[0], poster_file)
+                        self.poster[idx] = poster_file
+            except:
+                pass
         return True
 
     def rename(self, dst_dir=None):
@@ -163,31 +213,21 @@ class Video:
             dst_dir = "./"
 
         # Join path (slices)
-        dst_path = []
-        if self.slices > 1:
-            for idx in range(self.slices):
-                dst_path.append(os.path.join(dst_dir, "{:} {:}{:}".format(
-                    self.__gen_file_name(),
-                    chr(ord("A") + idx),
-                    self.file_path[idx].ext
-                )))
-        else:
-            dst_path.append(os.path.join(dst_dir, "{:}{:}".format(
-                self.__gen_file_name(),
-                self.file_path[0].ext
-            )))
+        dsts = []
+        for idx in range(self.slices):
+            dsts.append(os.path.join(dst_dir, self.dst_path[idx] + self.file_path[idx].ext))
 
         # Already exist or rename dir not exist
         if not os.path.exists(dst_dir):
             return False
         for idx in range(self.slices):
-            if os.path.exists(dst_path[idx]):
+            if os.path.exists(dsts[idx]):
                 return False
 
         # Rename
         for idx in range(self.slices):
-            os.rename(self.file_path[idx].path, dst_path[idx])
-            self.file_path[idx] = File(dst_path[idx])
+            os.rename(self.file_path[idx].path, dsts[idx])
+            self.file_path[idx] = File(dsts[idx])
         return True
 
     def save_info(self, dst_dir=None):
@@ -204,12 +244,17 @@ class Video:
         if dst_dir is None:
             dst_dir = "./"
 
-        # Join path
-        dst_path = os.path.join(dst_dir, "{:}{:}".format(self.__gen_file_name(), ".nfo"))
+        # Join path (slices)
+        dsts = []
+        for idx in range(self.slices):
+            dsts.append(os.path.join(dst_dir, self.dst_path[idx] + ".nfo"))
 
         # Already exist or dst dir not exist
-        if not os.path.exists(dst_dir) or os.path.exists(dst_path):
+        if not os.path.exists(dst_dir):
             return False
+        for idx in range(self.slices):
+            if os.path.exists(dsts[idx]):
+                return False
 
         nfo_movie = ET.Element("movie")
         ET.SubElement(nfo_movie, "title").text = self.title
@@ -220,9 +265,9 @@ class Video:
         ET.SubElement(nfo_movie, "plot").text = self.outline
         ET.SubElement(nfo_movie, "runtime").text = self.length[:-2]
         ET.SubElement(nfo_movie, "director").text = self.director
-        ET.SubElement(nfo_movie, "poster").text = self.__gen_file_name() + ".jpg"
-        ET.SubElement(nfo_movie, "thumb").text = self.__gen_file_name() + ".jpg"
-        ET.SubElement(nfo_movie, "fanart").text = self.__gen_file_name() + ".jpg"
+        ET.SubElement(nfo_movie, "poster").text = self.poster[0]
+        ET.SubElement(nfo_movie, "thumb").text = self.thumb[0]
+        ET.SubElement(nfo_movie, "fanart").text = self.fanart[0]
         for actor in self.cast:
             nfo_actor = ET.SubElement(nfo_movie, "actor")
             ET.SubElement(nfo_actor, "name").text = actor
@@ -238,4 +283,7 @@ class Video:
         ET.SubElement(nfo_movie, "website").text = self.video_url
 
         nfo = ET.ElementTree(nfo_movie)
-        nfo.write(dst_path, encoding="utf-8", xml_declaration=True)
+        
+        for idx in range(self.slices):
+            nfo.write(dsts[idx], encoding="utf-8", xml_declaration=True)
+        return True
