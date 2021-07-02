@@ -12,20 +12,22 @@ from avutil.library import Library
 def strip(string):
     return re.sub(r"\/|\?|\*|\:|\||\\|\<|\>", "", string)
 
+
 class File:
     path = ""
-    dir  = ""
+    dir = ""
     name = ""
-    ext  = ""
+    ext = ""
 
     def __init__(self, file_path):
         self.path = file_path
-        self.dir  = os.path.dirname (file_path)
+        self.dir = os.path.dirname(file_path)
         self.name = os.path.basename(file_path)
-        self.ext  = os.path.splitext(file_path)[1]
+        self.ext = os.path.splitext(file_path)[1]
 
     def __str__(self):
         return self.path
+
 
 class Video:
     ''' Describe details of an video which includes:
@@ -37,33 +39,33 @@ class Video:
     def __init__(self, designatio, file_paths=[]):
         self.is_updated = False
         # File attributes
-        self.slices      = len(file_paths)
-        self.file_path   = []
-        self.dst_path    = []
-        self.fanart      = []
-        self.poster      = []
-        self.thumb       = []
-        file_paths      = sorted(file_paths)
+        self.slices = len(file_paths)
+        self.file_path = []
+        self.dst_path = []
+        self.fanart = []
+        self.poster = []
+        self.thumb = []
+        file_paths = sorted(file_paths)
         for path in file_paths:
             self.file_path.append(File(path))
             self.subtitle = os.path.splitext(path)[0].endswith("C")
 
         # Video attributes
-        self.designatio  = designatio.upper()
-        self.title       = ""
-        self.outline     = ""
-        self.subtitle    = False
-        self.cover_url   = ""
-        self.video_url   = ""
-        self.date        = ""
-        self.length      = ""
-        self.director    = ""
-        self.maker       = ""
-        self.label       = ""
-        self.review      = ""
-        self.series      = []
-        self.genres      = []
-        self.cast        = []
+        self.designatio = designatio.upper()
+        self.title = ""
+        self.outline = ""
+        self.subtitle = False
+        self.cover_url = ""
+        self.video_url = ""
+        self.date = ""
+        self.length = ""
+        self.director = ""
+        self.maker = ""
+        self.label = ""
+        self.review = ""
+        self.series = []
+        self.genres = []
+        self.cast = []
 
     def __str__(self):
         ret = "[文件 {0}]".format(
@@ -119,7 +121,7 @@ class Video:
             return
         if self.subtitle:
             self.genres.append("中文字幕")
-      
+
         # Join path (slices)
         if self.slices > 1:
             for idx in range(self.slices):
@@ -149,7 +151,8 @@ class Video:
         # Join path
         dsts = []
         for idx in range(self.slices):
-            dsts.append(os.path.join(dst_dir, self.dst_path[idx] + "-fanart.jpg"))
+            dsts.append(os.path.join(
+                dst_dir, self.dst_path[idx] + "-fanart.jpg"))
         self.fanart = dsts
 
         # Already exist or download dir not exist
@@ -157,14 +160,15 @@ class Video:
             return False
         if not os.path.exists(dsts[0]):
             # Proxy
-            r = requests.get(self.cover_url, stream=True, proxies={"http": http_proxy})
+            r = requests.get(self.cover_url, stream=True,
+                             proxies={"http": http_proxy})
 
             # Download
             if r.status_code == 200:
                 with open(dsts[0], 'wb') as f:
                     for chunk in r:
                         f.write(chunk)
-        
+
         # Copy for each slice
         for idx in range(1, self.slices):
             if not os.path.exists(dsts[idx]):
@@ -176,19 +180,23 @@ class Video:
         if with_poster:
             try:
                 for idx in range(self.slices):
-                    thumb_file = os.path.join(dst_dir, self.dst_path[idx] + "-thumb.jpg")
+                    thumb_file = os.path.join(
+                        dst_dir, self.dst_path[idx] + "-thumb.jpg")
                     if not os.path.exists(thumb_file):
                         shutil.copyfile(dsts[0], thumb_file)
                         self.thumb[idx] = thumb_file
 
-                poster_file = os.path.join(dst_dir, self.dst_path[0] + "-poster.jpg")
-                img = PIL.Image.open(dsts[0])
+                poster_file = os.path.join(
+                    dst_dir, self.dst_path[0] + "-poster.jpg")
                 if not os.path.exists(poster_file):
-                    img.crop((img.width / 1.9, 0, img.width, img.height)).save(poster_file)
+                    img = PIL.Image.open(dsts[0])
+                    img.crop((img.width / 1.9, 0, img.width,
+                             img.height)).save(poster_file)
                     self.poster[0] = poster_file
 
                 for idx in range(1, self.slices):
-                    poster_file = os.path.join(dst_dir, self.dst_path[idx] + "-poster.jpg")
+                    poster_file = os.path.join(
+                        dst_dir, self.dst_path[idx] + "-poster.jpg")
                     if not os.path.exists(poster_file):
                         shutil.copyfile(self.poster[0], poster_file)
                         self.poster[idx] = poster_file
@@ -213,7 +221,8 @@ class Video:
         # Join path (slices)
         dsts = []
         for idx in range(self.slices):
-            dsts.append(os.path.join(dst_dir, self.dst_path[idx] + self.file_path[idx].ext))
+            dsts.append(os.path.join(
+                dst_dir, self.dst_path[idx] + self.file_path[idx].ext))
 
         # Already exist or rename dir not exist
         if not os.path.exists(dst_dir):
@@ -250,9 +259,6 @@ class Video:
         # Already exist or dst dir not exist
         if not os.path.exists(dst_dir):
             return False
-        for idx in range(self.slices):
-            if os.path.exists(dsts[idx]):
-                return False
 
         nfo_movie = ET.Element("movie")
         ET.SubElement(nfo_movie, "title").text = self.title
@@ -281,7 +287,8 @@ class Video:
         ET.SubElement(nfo_movie, "website").text = self.video_url
 
         nfo = ET.ElementTree(nfo_movie)
-        
+
         for idx in range(self.slices):
-            nfo.write(dsts[idx], encoding="utf-8", xml_declaration=True)
+            if not os.path.exists(dsts[idx]):
+                nfo.write(dsts[idx], encoding="utf-8", xml_declaration=True)
         return True

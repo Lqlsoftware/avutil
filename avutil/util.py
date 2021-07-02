@@ -3,6 +3,7 @@ import re
 
 from avutil.video import Video
 
+
 def Extract_designatio(file_name):
     ''' Extract designatio from given name (string)
     '''
@@ -28,7 +29,8 @@ def Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mkv"}, recursi
         # walk folder
         list_dirs = os.walk(folder)
     else:
-        files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
+        files = [f for f in os.listdir(
+            folder) if os.path.isfile(os.path.join(folder, f))]
         list_dirs = [(folder, None, files)]
 
     for folder, _, files in list_dirs:

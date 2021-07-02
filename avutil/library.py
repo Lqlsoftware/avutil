@@ -28,7 +28,8 @@ class Library:
             return
         # Protect by Cloudflare or Proxy required
         try:
-            response = requests.get(Library.base_url, proxies={"http": self.http_proxy})
+            response = requests.get(Library.base_url, proxies={
+                                    "http": self.http_proxy})
             if response.text.find("Cloudflare") != -1:
                 raise Exception()
         except Exception:
@@ -57,7 +58,8 @@ class Library:
             'Accept': 'text/event-stream',
             'Accept-Encoding': 'gzip'
         }
-        response = requests.get(URL, proxies={"http": self.http_proxy}, headers=headers)
+        response = requests.get(
+            URL, proxies={"http": self.http_proxy}, headers=headers)
 
         # parse html
         soup = bs4.BeautifulSoup(response.content, features="html.parser")
@@ -69,13 +71,14 @@ class Library:
             video = thumblist.select(".video > a")
             if video is None:
                 raise Exception("Not recruited")
-            
+
             # multiple result - choose the last one
             if video[0]['title'].endswith("（BOD）") or video[0]['title'].endswith("（ブルーレイディスク）"):
                 video = video[1:]
 
             URL = Library.base_url + video[0]['href']
-            response = requests.get(URL, proxies={"http": self.http_proxy}, headers=headers)
+            response = requests.get(
+                URL, proxies={"http": self.http_proxy}, headers=headers)
             soup = bs4.BeautifulSoup(response.content, features="html.parser")
 
         # video title
@@ -88,8 +91,10 @@ class Library:
         # outline <Airav>
         try:
             airav_URL = encode("gssor9..vvv-`hq`u-vhjh.uhcdn.") + designatio
-            outline_rep = requests.get(airav_URL, proxies={"http": self.http_proxy}, headers=headers)
-            airav_soup = bs4.BeautifulSoup(outline_rep.content, features="html.parser")
+            outline_rep = requests.get(
+                airav_URL, proxies={"http": self.http_proxy}, headers=headers)
+            airav_soup = bs4.BeautifulSoup(
+                outline_rep.content, features="html.parser")
             result["outline"] = airav_soup.select_one(".synopsis > p").string
         except:
             pass
