@@ -87,12 +87,12 @@ class Video:
     简介\t{0.outline}\n'''.format(self)
 
     def __gen_file_name(self):
-        if len(self.title.encode()) > 251:
+        if len(self.title.encode()) > 220:
             if len(self.cast) == 1:
-                overflow = 233 - len(self.title.encode()) - len(self.cast[0])
+                overflow = 227 - len(self.title.encode()) - len(self.cast[0])
                 return "{:}.. {:}".format(self.title[:overflow], self.cast[0])
             else:
-                overflow = 234 - len(self.title.encode())
+                overflow = 230 - len(self.title.encode())
                 return self.title[:overflow]
 
         else:
