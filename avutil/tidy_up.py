@@ -28,7 +28,8 @@ def VideoProcess(videos):
 
             # Pull AV info
             video.pull_info(source=source, http_proxy=http_proxy)
-            print(video.title)
+            if video.is_updated:
+                print("[%8s] %s" % (video.designatio, video.title))
 
             # Download cover
             video.download_cover(dst_dir=dst_folder,
