@@ -14,7 +14,7 @@ thread = 8
 with_poster = False
 
 
-def VideoProcess(designatio, file_paths):
+def VideoProcess(videos):
     global src_folder
     global dst_folder
     global http_proxy
@@ -22,25 +22,26 @@ def VideoProcess(designatio, file_paths):
     global thread
     global with_poster
 
-    try:
-        video = avutil.Video(designatio, file_paths)
+    for designatio, file_paths in videos:
+        try:
+            video = avutil.Video(designatio, file_paths)
 
-        # Pull AV info
-        video.pull_info(source=source, http_proxy=http_proxy)
-        print(video.title)
+            # Pull AV info
+            video.pull_info(source=source, http_proxy=http_proxy)
+            print(video.title)
 
-        # Download cover
-        video.download_cover(dst_dir=dst_folder,
-                             http_proxy=http_proxy, with_poster=with_poster)
+            # Download cover
+            video.download_cover(dst_dir=dst_folder,
+                                http_proxy=http_proxy, with_poster=with_poster)
 
-        # Tidy up
-        video.rename(dst_dir=dst_folder)
+            # Tidy up
+            video.rename(dst_dir=dst_folder)
 
-        # Save video info as .nfo
-        video.save_info(dst_dir=dst_folder)
-    except Exception as e:
-        print("WARN:", e)
-        pass
+            # Save video info as .nfo
+            video.save_info(dst_dir=dst_folder)
+        except Exception as e:
+            print("WARN:", e)
+            pass
 
 
 def get_arguments(args=sys.argv[1:]):
@@ -96,6 +97,8 @@ def main():
     # Threads num
     if args.thread is not None:
         thread = int(args.thread)
+    else:
+        thread = 1
 
     # Search folder
     if args.recursive == True:
@@ -104,9 +107,14 @@ def main():
         videos = avutil.Search_folder(src_folder)
 
     # Threads work
+    jobs = [v for v in videos.items()]
+    queue_size = (len(videos) + thread - 1) // thread
     workers = []
-    for video in videos.items():
-        workers.append(threading.Thread(target=VideoProcess, args=video))
+    for idx in range(0, thread):
+        start = idx * queue_size
+        end = min(start + queue_size, len(jobs))
+        queue = [jobs[start:end]]
+        workers.append(threading.Thread(target=VideoProcess, args=queue))
 
     # Start
     for t in workers:
