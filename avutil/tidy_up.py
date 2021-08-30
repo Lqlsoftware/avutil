@@ -4,6 +4,8 @@ import argparse
 import threading
 import avutil
 
+from multiprocessing.dummy import Pool
+
 sys.setrecursionlimit(10000)
 
 src_folder = "./"
@@ -14,7 +16,7 @@ thread = 8
 with_poster = False
 
 
-def VideoProcess(videos):
+def VideoProcess(video):
     global src_folder
     global dst_folder
     global http_proxy
@@ -22,27 +24,27 @@ def VideoProcess(videos):
     global thread
     global with_poster
 
-    for designatio, file_paths in videos:
-        try:
-            video = avutil.Video(designatio, file_paths)
+    try:
+        designatio, file_paths = video
+        video = avutil.Video(designatio, file_paths)
 
-            # Pull AV info
-            video.pull_info(source=source, http_proxy=http_proxy)
-            if video.is_updated:
-                print("[%8s] %s" % (video.designatio, video.title))
+        # Pull AV info
+        video.pull_info(source=source, http_proxy=http_proxy)
+        if video.is_updated:
+            print("[%8s] %s" % (video.designatio, video.title))
 
-            # Download cover
-            video.download_cover(dst_dir=dst_folder,
-                                http_proxy=http_proxy, with_poster=with_poster)
+        # Download cover
+        video.download_cover(dst_dir=dst_folder,
+                             http_proxy=http_proxy, with_poster=with_poster)
 
-            # Tidy up
-            video.rename(dst_dir=dst_folder)
+        # Tidy up
+        video.rename(dst_dir=dst_folder)
 
-            # Save video info as .nfo
-            video.save_info(dst_dir=dst_folder)
-        except Exception as e:
-            print("WARN:", e)
-            pass
+        # Save video info as .nfo
+        video.save_info(dst_dir=dst_folder)
+    except Exception as e:
+        print("WARN:", e)
+        pass
 
 
 def get_arguments(args=sys.argv[1:]):
@@ -99,7 +101,7 @@ def main():
     if args.thread is not None:
         thread = int(args.thread)
     else:
-        thread = 1
+        thread = 4
 
     # Search folder
     if args.recursive == True:
@@ -109,18 +111,7 @@ def main():
 
     # Threads work
     jobs = [v for v in videos.items()]
-    queue_size = (len(videos) + thread - 1) // thread
-    workers = []
-    for idx in range(0, thread):
-        start = idx * queue_size
-        end = min(start + queue_size, len(jobs))
-        queue = [jobs[start:end]]
-        workers.append(threading.Thread(target=VideoProcess, args=queue))
-
-    # Start
-    for t in workers:
-        t.start()
-
-    # Join
-    for t in workers:
-        t.join()
+    pool = Pool(thread)
+    pool.map(VideoProcess, jobs)
+    pool.close()
+    pool.join()
