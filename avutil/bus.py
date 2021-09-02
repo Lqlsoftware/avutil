@@ -38,7 +38,10 @@ class Bus:
         result["title"] = soup.select_one("body > .container > h3").string
 
         # cover image
-        result["cover_url"] = soup.select_one(".bigImage")["href"]
+        cover_url = soup.select_one(".bigImage")["href"]
+        if cover_url.startswith('/'):
+            cover_url = self.base_url + cover_url
+        result["cover_url"] = cover_url
 
         # outline <Airav>
         try:
