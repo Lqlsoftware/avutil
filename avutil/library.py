@@ -85,8 +85,11 @@ class Library:
         result["title"] = soup.select_one(".post-title").getText()
 
         # cover image
-        result["cover_url"] = "http:" + \
-            soup.select_one("#video_jacket_img")["src"]
+        cover_url = soup.select_one("#video_jacket_img")["src"]
+        if cover_url.startswith("http"):
+            result["cover_url"] = cover_url
+        else:
+            result["cover_url"] = "http:" + cover_url
 
         # outline <Airav>
         try:
