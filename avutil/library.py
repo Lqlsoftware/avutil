@@ -43,7 +43,7 @@ class Library:
             new_url = re.sub("([^a-z0-9]*)", "", new_url)
 
             # New base_url
-            Library.base_url = "http://%s.com/cn/" % new_url
+            Library.base_url = "https://%s.com/cn/" % new_url
         Library.url_accessible = True
 
     def Get(self, designatio):
