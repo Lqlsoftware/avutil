@@ -89,14 +89,13 @@ class Video:
     简介\t{0.outline}\n'''.format(self)
 
     def __gen_file_name(self):
-        if len(self.title.encode()) > 220:
+        if len(self.title.encode()) > 200:
             if len(self.cast) == 1:
-                overflow = 227 - len(self.title.encode()) - len(self.cast[0])
-                return "{:}.. {:}".format(self.title[:overflow], self.cast[0])
+                overflow = 207 - len(self.title.encode()) - len(self.cast[0])
+                return "{:}.. {:}".format(self.title[:overflow // 3], self.cast[0])
             else:
-                overflow = 230 - len(self.title.encode())
-                return self.title[:overflow]
-
+                overflow = 200 - len(self.title.encode())
+                return self.title[:overflow // 3]
         else:
             return strip(self.title)
 
@@ -221,6 +220,8 @@ class Video:
         # Join path (slices)
         dsts = []
         for idx in range(self.slices):
+            if len(self.dst_path[idx]) == 0:
+                return False
             dsts.append(os.path.join(
                 dst_dir, self.dst_path[idx] + self.file_path[idx].ext))
 
