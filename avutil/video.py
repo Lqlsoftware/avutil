@@ -48,7 +48,7 @@ class Video:
         file_paths = sorted(file_paths)
         for path in file_paths:
             self.file_path.append(File(path))
-            self.subtitle = os.path.splitext(path)[0].endswith("C")
+            self.subtitle = os.path.splitext(path)[0].upper().endswith("C")
 
         # Video attributes
         self.designatio = designatio.upper()
