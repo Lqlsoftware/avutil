@@ -91,10 +91,10 @@ class Video:
     def __gen_file_name(self):
         if len(self.title.encode()) > 200:
             if len(self.cast) == 1:
-                overflow = 207 - len(self.title.encode()) - len(self.cast[0])
+                overflow = 200 - len(self.cast[0].encode())
                 return "{:}.. {:}".format(self.title[:overflow // 3], self.cast[0])
             else:
-                overflow = 200 - len(self.title.encode())
+                overflow = 200
                 return self.title[:overflow // 3]
         else:
             return strip(self.title)
