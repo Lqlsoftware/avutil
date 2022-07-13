@@ -3,6 +3,7 @@ import sys
 import argparse
 import threading
 import avutil
+import avutil.source
 
 from multiprocessing.dummy import Pool
 
@@ -11,7 +12,7 @@ sys.setrecursionlimit(10000)
 src_folder = "./"
 dst_folder = "./"
 http_proxy = ""
-source = avutil.Library
+source = avutil.source.Library
 thread = 8
 with_poster = False
 
@@ -91,7 +92,7 @@ def main():
 
     # Data source
     if args.source == "bus":
-        source = avutil.Bus
+        source = avutil.source.Bus
 
     # Gen poster
     if args.with_poster == True:

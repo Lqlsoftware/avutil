@@ -5,8 +5,8 @@ import requests
 import xml.etree.ElementTree as ET
 import PIL
 
-from avutil.bus import Bus
-from avutil.library import Library
+from avutil.source import Bus
+from avutil.source import Library
 
 
 def strip(string):
