@@ -65,6 +65,8 @@ def get_arguments(args=sys.argv[1:]):
                         help="data source of video info, 'library' or 'bus'")
     parser.add_argument("-t", "--thread", dest='thread', type=int,
                         help="threads num, use multi-threads to download info & images")
+    parser.add_argument("-e", "--encoder", dest='encoder',
+                        help="encoder of meta-data, 'nfo'(default) or 'vsmeta'")
     parser.add_argument("--with-poster", dest='with_poster', action='store_true',
                         help="save poster")
     return parser.parse_args(args)
@@ -96,6 +98,10 @@ def main():
     # Data source
     if args.source == "bus":
         source = avutil.source.Bus
+
+    # Encoder
+    if args.encoder == "vsmeta":
+        encoder = avutil.encoder.VSMETAEncoder
 
     # Gen poster
     if args.with_poster == True:

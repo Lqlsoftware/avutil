@@ -8,6 +8,7 @@ import PIL.Image
 from avutil.info import VideoInfo
 # from avutil import VideoInfo
 from avutil.encoder import NFOEncoder
+from avutil.encoder import VSMETAEncoder
 from avutil.source import Library
 from avutil.source import Bus
 
@@ -222,7 +223,12 @@ class Video:
         # Join path (slices)
         dsts = []
         for idx in range(self.slices):
-            dsts.append(os.path.join(dst_dir, self.dst_path[idx] + ".nfo"))
+            if encoder == VSMETAEncoder:
+                dsts.append(os.path.join(
+                    dst_dir, self.dst_path[idx] + self.file_path[idx].ext + encoder.ext))
+            else:
+                dsts.append(os.path.join(
+                    dst_dir, self.dst_path[idx] + encoder.ext))
 
         # Already exist or dst dir not exist
         if not os.path.exists(dst_dir):

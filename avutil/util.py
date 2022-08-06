@@ -1,8 +1,6 @@
 import os
 import re
 
-from avutil.video import Video
-
 
 def Extract_designatio(file_name):
     ''' Extract designatio from given name (string)
@@ -42,7 +40,7 @@ def Search_folder(folder, media_suffix={".mp4", ".wmv", ".avi", ".mkv"}, recursi
                 continue
 
             # info already saved
-            if os.path.exists(os.path.join(folder, file_name[0] + ".nfo")):
+            if os.path.exists(os.path.join(folder, file_name[0] + ".nfo")) or os.path.exists(f + ".vsmeta"):
                 continue
 
             # extract
