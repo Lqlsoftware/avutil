@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import argparse
-import threading
 import avutil
 import avutil.source
 import avutil.encoder
@@ -115,8 +114,11 @@ def main():
         videos = avutil.Search_folder(src_folder)
 
     # Threads work
-    jobs = [v for v in videos.items()]
-    pool = Pool(thread)
-    pool.map(VideoProcess, jobs)
-    pool.close()
-    pool.join()
+    if thread == 1:
+        for v in videos.items():
+            VideoProcess(v)
+    else:
+        pool = Pool(thread)
+        pool.map(VideoProcess, videos.items())
+        pool.close()
+        pool.join()
