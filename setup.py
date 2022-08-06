@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="avutil",
-    version="1.4.5",
+    version="1.4.6",
     author="Everyone",
     description="Provide some useful util functions and a poweful tool (tidyup) for tidying up your video folder",
     long_description=long_description,
@@ -20,7 +20,8 @@ setuptools.setup(
     install_requires=[
       'beautifulsoup4 >= 4.7.0',
       'requests >= 2.21.0',
-      'pytesseract >= 0.3.7'
+      'pytesseract >= 0.3.7',
+      'bitstring >= 3.1.0',
     ],
     entry_points={
         'console_scripts': [
