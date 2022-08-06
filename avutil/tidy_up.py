@@ -4,6 +4,7 @@ import argparse
 import threading
 import avutil
 import avutil.source
+import avutil.encoder
 
 from multiprocessing.dummy import Pool
 
@@ -13,6 +14,7 @@ src_folder = "./"
 dst_folder = "./"
 http_proxy = ""
 source = avutil.source.Library
+encoder = avutil.encoder.NFOEncoder
 thread = 8
 with_poster = False
 
@@ -22,6 +24,7 @@ def VideoProcess(video):
     global dst_folder
     global http_proxy
     global source
+    global encoder
     global thread
     global with_poster
 
@@ -32,7 +35,7 @@ def VideoProcess(video):
         # Pull AV info
         video.pull_info(source=source, http_proxy=http_proxy)
         if video.is_updated:
-            print("[%8s] %s" % (video.designatio, video.title))
+            print("[%8s] %s" % (video.info.designatio, video.info.title))
 
         # Download cover
         video.download_cover(dst_dir=dst_folder,
@@ -42,7 +45,7 @@ def VideoProcess(video):
         video.rename(dst_dir=dst_folder)
 
         # Save video info as .nfo
-        video.save_info(dst_dir=dst_folder)
+        video.save_info(dst_dir=dst_folder, encoder=encoder)
     except Exception as e:
         print("WARN:", e)
         pass
@@ -74,6 +77,7 @@ def main():
     global dst_folder
     global http_proxy
     global source
+    global encoder
     global thread
     global with_poster
 

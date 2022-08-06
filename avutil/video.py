@@ -1,12 +1,15 @@
 import os
-import shutil
+import io
 import re
 import requests
 import xml.etree.ElementTree as ET
-import PIL
+import PIL.Image
 
-from avutil.source import Bus
+from avutil.info import VideoInfo
+# from avutil import VideoInfo
+from avutil.encoder import NFOEncoder
 from avutil.source import Library
+from avutil.source import Bus
 
 
 def strip(string):
@@ -30,42 +33,27 @@ class File:
 
 
 class Video:
-    ''' Describe details of an video which includes:
+    ''' Descriptor of video:
 
-        'designatio' 'title' 'cover_url' 'date' 'length'
-        'director' 'maker' 'label' 'genres' 'cast'
+        Provide following operations:
+            pull_info(): Pull video info from source
+            download_cover(): Download cover
+            rename(): Rename as designatio + title
+            save_info(): Save info to file
     '''
 
     def __init__(self, designatio, file_paths=[]):
+        self.info = VideoInfo(designatio)
         self.is_updated = False
         # File attributes
         self.slices = len(file_paths)
         self.file_path = []
         self.dst_path = []
-        self.fanart = []
-        self.poster = []
-        self.thumb = []
         file_paths = sorted(file_paths)
         for path in file_paths:
             self.file_path.append(File(path))
-            self.subtitle = os.path.splitext(path)[0].upper().endswith("C")
-
-        # Video attributes
-        self.designatio = designatio.upper()
-        self.title = ""
-        self.outline = ""
-        self.subtitle = False
-        self.cover_url = ""
-        self.video_url = ""
-        self.date = ""
-        self.length = ""
-        self.director = ""
-        self.maker = ""
-        self.label = ""
-        self.review = ""
-        self.series = []
-        self.genres = []
-        self.cast = []
+            self.info.subtitle = os.path.splitext(
+                path)[0].upper().endswith("C")
 
     def __str__(self):
         ret = "[文件 {0}]".format(
@@ -74,52 +62,38 @@ class Video:
         if not self.is_updated:
             return ret
         else:
-            return ret + '''\n
-    标题\t{0.title}
-    番号\t{0.designatio}
-    发行日期\t{0.date}
-    影片长度\t{0.length}
-    导演\t{0.director}
-    制作商\t{0.maker}
-    发行商\t{0.label}
-    评分\t{0.review}
-    系列\t{0.series}
-    类别\t{0.genres}
-    演员\t{0.cast}
-    简介\t{0.outline}\n'''.format(self)
+            return ret + str(self.info)
 
     def __gen_file_name(self):
-        if len(self.title.encode()) > 200:
-            if len(self.cast) == 1:
-                overflow = 200 - len(self.cast[0].encode())
-                return "{:}.. {:}".format(self.title[:overflow // 3], self.cast[0])
+        if len(self.info.title.encode()) > 200:
+            if len(self.info.cast) == 1:
+                overflow = 200 - len(self.info.cast[0].encode())
+                return "{:}.. {:}".format(self.info.title[:overflow // 3], self.info.cast[0])
             else:
                 overflow = 200
-                return self.title[:overflow // 3]
+                return self.info.title[:overflow // 3]
         else:
-            return strip(self.title)
+            return strip(self.info.title)
 
     def pull_info(self, source=Library, http_proxy=""):
         ''' Pull video details by designatio from source. 
 
-            source is set to Library() by default
-
+            source is set to Library by default
             http_proxy is set to "" by default
         '''
         source = source(http_proxy=http_proxy)
-        self.video_url = source.base_url + source.search_prefix + self.designatio
+        self.video_url = source.base_url + source.search_prefix + self.info.designatio
         try:
-            attrs = source.Get(self.designatio)
+            attrs = source.Get(self.info.designatio)
             for name, value in attrs.items():
-                self.__setattr__(name, value)
-        except Exception:
-            print(
-                "Video not recruited or require proxy: ",
-                " ".join([str(file) for file in self.file_path])
-            )
+                self.info.__setattr__(name, value)
+        except Exception as e:
+            print("Mata-data not found or network error, please try enable proxy:")
+            print("    Exception: ", str(e))
+            print("    ", " ".join([str(file) for file in self.file_path]))
             return
-        if self.subtitle:
-            self.genres.append("中文字幕")
+        if self.info.subtitle:
+            self.info.genres.append("中文字幕")
 
         # Join path (slices)
         if self.slices > 1:
@@ -143,64 +117,57 @@ class Video:
         if not self.is_updated:
             return False
 
-        # User specify download dir
+        # Download image
+        dw_bytes = io.BytesIO()
+        r = requests.get(self.info.cover_url, stream=True,
+                         proxies={"http": http_proxy})
+        if r.status_code == 200:
+            for chunk in r:
+                dw_bytes.write(chunk)
+
+        # Cut Poster
+        img_bytes = io.BytesIO()
+        with PIL.Image.open(io.BytesIO(dw_bytes.getvalue())) as img:
+            img.crop((img.width / 1.9, 0, img.width, img.height)
+                     ).save(img_bytes, format='jpeg')
+
+        # Update fanart, thumb
+        self.info.fanart = dw_bytes.getvalue()
+        self.info.thumb = dw_bytes.getvalue()
+        self.info.poster = img_bytes.getvalue()
+
+        # Save as jpeg file
+        #   User specify download dir
         if dst_dir is None:
             dst_dir = "./"
-
-        # Join path
-        dsts = []
-        for idx in range(self.slices):
-            dsts.append(os.path.join(
-                dst_dir, self.dst_path[idx] + "-fanart.jpg"))
-        self.fanart = dsts
-
-        # Already exist or download dir not exist
         if not os.path.exists(dst_dir):
             return False
-        if not os.path.exists(dsts[0]):
-            # Proxy
-            r = requests.get(self.cover_url, stream=True,
-                             proxies={"http": http_proxy})
 
-            # Download
-            if r.status_code == 200:
-                with open(dsts[0], 'wb') as f:
-                    for chunk in r:
-                        f.write(chunk)
+        #   Fanart
+        self.info.fanart_path = os.path.join(
+            dst_dir, self.__gen_file_name() + "-fanart.jpg")
+        if not os.path.exists(self.info.fanart_path):
+            with open(self.info.fanart_path, "+wb") as f:
+                f.write(self.info.fanart)
 
-        # Copy for each slice
-        for idx in range(1, self.slices):
-            if not os.path.exists(dsts[idx]):
-                shutil.copyfile(dsts[0], dsts[idx])
-
-        # Poster cut
-        self.poster = [e for e in self.fanart]
-        self.thumb = [e for e in self.fanart]
         if with_poster:
-            try:
-                for idx in range(self.slices):
-                    thumb_file = os.path.join(
-                        dst_dir, self.dst_path[idx] + "-thumb.jpg")
-                    if not os.path.exists(thumb_file):
-                        shutil.copyfile(dsts[0], thumb_file)
-                        self.thumb[idx] = thumb_file
+            #   Thumb
+            self.info.thumb_path = os.path.join(
+                dst_dir, self.__gen_file_name() + "-thumb.jpg")
+            if not os.path.exists(self.info.thumb_path):
+                with open(self.info.thumb_path, "+wb") as f:
+                    f.write(self.info.thumb)
 
-                poster_file = os.path.join(
-                    dst_dir, self.dst_path[0] + "-poster.jpg")
-                if not os.path.exists(poster_file):
-                    img = PIL.Image.open(dsts[0])
-                    img.crop((img.width / 1.9, 0, img.width,
-                             img.height)).save(poster_file)
-                    self.poster[0] = poster_file
+            #   Poster
+            self.info.poster_path = os.path.join(
+                dst_dir, self.__gen_file_name() + "-poster.jpg")
+            if not os.path.exists(self.info.poster_path):
+                with open(self.info.poster_path, "+wb") as f:
+                    f.write(self.info.poster)
+        else:
+            self.info.thumb_path = self.info.fanart_path
+            self.info.poster_path = self.info.fanart_path
 
-                for idx in range(1, self.slices):
-                    poster_file = os.path.join(
-                        dst_dir, self.dst_path[idx] + "-poster.jpg")
-                    if not os.path.exists(poster_file):
-                        shutil.copyfile(self.poster[0], poster_file)
-                        self.poster[idx] = poster_file
-            except:
-                pass
         return True
 
     def rename(self, dst_dir=None):
@@ -238,7 +205,7 @@ class Video:
             self.file_path[idx] = File(dsts[idx])
         return True
 
-    def save_info(self, dst_dir=None):
+    def save_info(self, dst_dir=None, encoder=NFOEncoder):
         ''' Save video info as title.nfo
 
             dst_dir will be orignal file_dir by default
@@ -261,35 +228,11 @@ class Video:
         if not os.path.exists(dst_dir):
             return False
 
-        nfo_movie = ET.Element("movie")
-        ET.SubElement(nfo_movie, "title").text = self.title
-        ET.SubElement(nfo_movie, "set")
-        ET.SubElement(nfo_movie, "studio").text = self.maker
-        ET.SubElement(nfo_movie, "year").text = self.date[:4]
-        ET.SubElement(nfo_movie, "outline").text = self.outline
-        ET.SubElement(nfo_movie, "plot").text = self.outline
-        ET.SubElement(nfo_movie, "runtime").text = self.length[:-2]
-        ET.SubElement(nfo_movie, "director").text = self.director
-        ET.SubElement(nfo_movie, "poster").text = self.poster[0]
-        ET.SubElement(nfo_movie, "thumb").text = self.thumb[0]
-        ET.SubElement(nfo_movie, "fanart").text = self.fanart[0]
-        for actor in self.cast:
-            nfo_actor = ET.SubElement(nfo_movie, "actor")
-            ET.SubElement(nfo_actor, "name").text = actor
-        ET.SubElement(nfo_movie, "maker").text = self.maker
-        ET.SubElement(nfo_movie, "label").text = self.label
-        for genre in self.genres:
-            ET.SubElement(nfo_movie, "tag").text = genre
-        for genre in self.genres:
-            ET.SubElement(nfo_movie, "genre").text = genre
-        ET.SubElement(nfo_movie, "num").text = self.designatio
-        ET.SubElement(nfo_movie, "premiered").text = self.date
-        ET.SubElement(nfo_movie, "cover").text = self.cover_url
-        ET.SubElement(nfo_movie, "website").text = self.video_url
-
-        nfo = ET.ElementTree(nfo_movie)
+        # Encode by selected encoder
+        encoded_bytes = encoder().encode(self.info.todict())
 
         for idx in range(self.slices):
             if not os.path.exists(dsts[idx]):
-                nfo.write(dsts[idx], encoding="utf-8", xml_declaration=True)
+                with open(dsts[idx], "+wb") as f:
+                    f.write(encoded_bytes)
         return True
