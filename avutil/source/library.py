@@ -72,11 +72,17 @@ class Library:
             if video is None:
                 raise Exception("Not recruited")
 
-            # multiple result - choose the last one
-            if video[0]['title'].endswith("（BOD）") or video[0]['title'].endswith("（ブルーレイディスク）"):
-                video = video[1:]
+            # multiple result - choose the correct one
+            idx = 0
+            for i in range(len(video)):
+                print(video[i]['title'])
+                if video[i]['title'].startswith(designatio + " "):
+                    idx = i
+                    break
+            else:
+                raise Exception("Not recruited")
 
-            URL = Library.base_url + video[0]['href']
+            URL = Library.base_url + video[idx]['href']
             response = requests.get(
                 URL, proxies={"http": self.http_proxy}, headers=headers)
             soup = bs4.BeautifulSoup(response.content, features="html.parser")
