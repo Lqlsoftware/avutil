@@ -75,7 +75,6 @@ class Library:
             # multiple result - choose the correct one
             idx = 0
             for i in range(len(video)):
-                print(video[i]['title'])
                 if video[i]['title'].startswith(designatio + " "):
                     idx = i
                     break
