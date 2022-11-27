@@ -27,6 +27,7 @@ class VideoInfo:
         self.genres = []
         self.cast = []
         self.subtitle = False
+        self.uncensored = False
 
     def __str__(self):
         return '''\n

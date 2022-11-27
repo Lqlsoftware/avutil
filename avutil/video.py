@@ -55,6 +55,7 @@ class Video:
             self.file_path.append(File(path))
             self.info.subtitle = os.path.splitext(
                 path)[0].upper().endswith("C")
+            self.info.uncensored = (path.upper().find("UNCENSOR") != -1)
 
     def __str__(self):
         ret = "[文件 {0}]".format(
@@ -95,6 +96,9 @@ class Video:
             return
         if self.info.subtitle:
             self.info.genres.append("中文字幕")
+
+        if self.info.uncensored:
+            self.info.genres.append("无码流出")
 
         # Join path (slices)
         if self.slices > 1:
