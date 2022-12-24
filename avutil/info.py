@@ -26,8 +26,9 @@ class VideoInfo:
         self.series = []
         self.genres = []
         self.cast = []
-        self.subtitle = False
-        self.uncensored = False
+        self.is_subtitle = False
+        self.is_ncensored = False
+        self.is_4K = False
 
     def __str__(self):
         return '''\n
@@ -45,4 +46,14 @@ class VideoInfo:
     简介\t{0.outline}\n'''.format(self)
 
     def todict(self):
-        return vars(self)
+        vars_dict = vars(self)
+        if self.is_subtitle:
+            vars_dict['genres'].append("中文字幕")
+
+        if self.is_uncensored:
+            vars_dict['genres'].append("无码流出")
+
+        if self.is_4K:
+            vars_dict['genres'].append("4K")
+
+        return vars_dict

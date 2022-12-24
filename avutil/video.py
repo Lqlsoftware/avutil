@@ -53,9 +53,10 @@ class Video:
         file_paths = sorted(file_paths)
         for path in file_paths:
             self.file_path.append(File(path))
-            self.info.subtitle = os.path.splitext(
+            self.info.is_subtitle = os.path.splitext(
                 path)[0].upper().endswith("C")
-            self.info.uncensored = (path.upper().find("UNCENSOR") != -1)
+            self.info.is_uncensored = (path.upper().find("UNCENSOR") != -1)
+            self.info.is_4K = (path.upper().find("4K") != -1)
 
     def __str__(self):
         ret = "[文件 {0}]".format(
@@ -94,11 +95,6 @@ class Video:
             print("    Exception: ", str(e))
             print("    ", " ".join([str(file) for file in self.file_path]))
             return
-        if self.info.subtitle:
-            self.info.genres.append("中文字幕")
-
-        if self.info.uncensored:
-            self.info.genres.append("无码流出")
 
         # Join path (slices)
         if self.slices > 1:
