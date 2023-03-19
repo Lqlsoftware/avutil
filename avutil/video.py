@@ -68,13 +68,14 @@ class Video:
             return ret + str(self.info)
 
     def __gen_file_name(self):
-        if len(self.info.title.encode()) > 200:
+        MAX_LENGTH = 200
+        if len(self.info.title.encode()) > MAX_LENGTH:
             if len(self.info.cast) == 1:
-                overflow = 200 - len(self.info.cast[0].encode())
-                return "{:}.. {:}".format(self.info.title[:overflow // 3], self.info.cast[0])
+                overflow = MAX_LENGTH - len(self.info.cast[0].encode())
+                return strip("{:}.. {:}".format(self.info.title[:overflow // 3], self.info.cast[0]))
             else:
-                overflow = 200
-                return self.info.title[:overflow // 3]
+                overflow = MAX_LENGTH
+                return strip(self.info.title[:overflow // 3])
         else:
             return strip(self.info.title)
 
