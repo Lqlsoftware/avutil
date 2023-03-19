@@ -9,7 +9,7 @@ def Extract_designatio(file_name):
     file_name = os.path.splitext(file_name)[0]
 
     # Re match
-    match = re.match(r".*?([a-zA-Z]+[\-\_\s]*?[0-9]+)", file_name)
+    match = re.match(r".*?([a-zA-Z]+[0-9]*[\-\_\s]*?[0-9]+[a-zA-Z]?)", file_name)
     if match is None:
         return None
     return match.groups()[0]
