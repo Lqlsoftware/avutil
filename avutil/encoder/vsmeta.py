@@ -40,7 +40,7 @@ class VSMETAEncoder:
     def encode(self, video: dict):
         ''' encode video info as vsmeta format
 
-            return bytes that encode using vsmeta format
+            return bytes that encode using vsmeta format 
 
             VSMETA is appliable in Synology Video Station
         '''
