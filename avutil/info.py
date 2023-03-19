@@ -23,6 +23,7 @@ class VideoInfo:
         self.maker = ""
         self.label = ""
         self.review = ""
+        self.mpaa = "JP-18+"
         self.series = []
         self.genres = []
         self.cast = []

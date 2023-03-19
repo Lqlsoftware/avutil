@@ -18,12 +18,15 @@ class NFOEncoder:
 
         nfo_movie = ET.Element("movie")
         ET.SubElement(nfo_movie, "title").text = video.get("title")
+        ET.SubElement(nfo_movie, "originaltitle").text = video.get("title").lstrip(video.get("designatio")).lstrip()
         ET.SubElement(nfo_movie, "set")
         ET.SubElement(nfo_movie, "studio").text = video.get("maker")
         ET.SubElement(nfo_movie, "year").text = video.get("date")[:4]
+        ET.SubElement(nfo_movie, "mpaa").text = video.get("mpaa")
+        ET.SubElement(nfo_movie, "rating").text = video.get("review")
         ET.SubElement(nfo_movie, "outline").text = video.get("outline")
         ET.SubElement(nfo_movie, "plot").text = video.get("outline")
-        ET.SubElement(nfo_movie, "runtime").text = video.get("length")[:-2]
+        ET.SubElement(nfo_movie, "runtime").text = video.get("length")
         ET.SubElement(nfo_movie, "director").text = video.get("director")
         ET.SubElement(nfo_movie, "poster").text = video.get("poster_path")
         ET.SubElement(nfo_movie, "thumb").text = video.get("thumb_path")
@@ -39,6 +42,8 @@ class NFOEncoder:
             ET.SubElement(nfo_movie, "genre").text = genre
         ET.SubElement(nfo_movie, "num").text = video.get("designatio")
         ET.SubElement(nfo_movie, "premiered").text = video.get("date")
+        ET.SubElement(nfo_movie, "releasedate").text = video.get("date")
+        ET.SubElement(nfo_movie, "tagline").text = "配信開始日 " + video.get("date")
         ET.SubElement(nfo_movie, "cover").text = video.get("cover_url")
         ET.SubElement(nfo_movie, "website").text = video.get("video_url")
 
