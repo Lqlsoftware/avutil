@@ -84,6 +84,7 @@ class Library:
 
             # multiple result - choose the correct one
             matched = [i for i in range(0, len(video)) if video[i]['title'].startswith(designatio + " ") ]
+            idx = None
             if len(matched) == 0:
                 raise Exception("Not recruited")
             elif len(matched) == 1:
@@ -95,14 +96,14 @@ class Library:
                     title0 = video[idx0]['title']
                     title1 = video[idx1]['title']
                     if title1.startswith(title0):
-                        idx = idx0
+                        idx = matched[idx0]
                     elif title0.startswith(title1):
-                        idx = idx1
+                        idx = matched[idx1]
                 if idx is None:
                     print("Multiple Choice:")
                     for i in range(0, len(matched)):
                         print("  [%d] %s" % (i, video[matched[i]]['title']))
-                    idx = int(input("\nSelect > "))
+                    idx = matched[int(input("\nSelect > "))]
 
             URL = Library.base_url + video[idx]['href']
             response = requests.get(
