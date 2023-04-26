@@ -6,7 +6,6 @@ import xml.etree.ElementTree as ET
 import PIL.Image
 
 from avutil.info import VideoInfo
-# from avutil import VideoInfo
 from avutil.encoder import NFOEncoder
 from avutil.encoder import VSMETAEncoder
 from avutil.source import Library

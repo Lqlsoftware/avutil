@@ -30,7 +30,48 @@ def str2bytes(string: str):
     return bs.bytes
 
 
+def img2bytes(image: bytes):
+    b64_bytes = base64.b64encode(image)
+
+    out_str = ''
+    count = 0
+    for chr in b64_bytes.decode():
+        if count == 76:
+            count = 0
+            out_str += '\n'
+        out_str += chr
+        count += 1
+    bs = bitstring.BitStream()
+    bs.append(str2bytes(out_str))
+    return bs.bytes
+
 class VSMETAEncoder:
+
+    TAG_FILE_HEADER_MOVIE = b'\x08\x01'
+
+    TAG_SHOW_TITLE = b'\x12'
+    TAG_SHOW_TITLE2 = b'\x1A'
+    TAG_EPISODE_TITLE = b'\x22'
+    TAG_YEAR = b'\x28'
+    TAG_EPISODE_RELEASE_DATE = b'\x32'
+    TAG_EPISODE_LOCKED = b'\x38'
+    TAG_CHAPTER_SUMMARY = b'\x42'
+    TAG_EPISODE_META_JSON = b'\x4A'
+    TAG_GROUP1 = b'\x52'
+    TAG_CLASSIFICATION = b'\x5A'
+    TAG_RATING = b'\x60'
+    TAG_EPISODE_THUMB_DATA = b'\x8a'
+    TAG_EPISODE_THUMB_MD5 = b'\x92'
+    TAG_GROUP2 = b'\xAA'
+
+    TAG1_CAST = b'\x0A'
+    TAG1_DIRECTOR = b'\x12'
+    TAG1_GENRE = b'\x1A'
+    TAG1_WRITER = b'\x22'
+
+    TAG2_BACKDROP_DATA = b'\x0a'
+    TAG2_BACKDROP_MD5 = b'\x12'
+    TAG2_TIMESTAMP = b'\x18'
 
     ext = ".vsmeta"
 
@@ -47,78 +88,93 @@ class VSMETAEncoder:
         bs = bitstring.BitStream()
 
         # Header
-        bs.append(b"\x08\x01")
+        bs.append(self.TAG_FILE_HEADER_MOVIE)
 
         # Main Title
-        bs.append(b"\x12")
+        bs.append(self.TAG_SHOW_TITLE)
         bs.append(str2bytes(video.get("designatio")))
-        bs.append(b"\x1a")
-        bs.append(str2bytes(video.get("designatio")))
+        bs.append(self.TAG_SHOW_TITLE2)
+        bs.append(str2bytes(video.get("title")))
 
         # Title
-        bs.append(b"\x22")
+        bs.append(self.TAG_EPISODE_TITLE)
         bs.append(str2bytes(video.get("title")))
 
         # Date
-        bs.append(b"\x28\xe6\x0f\x32")
-        bs.append(str2bytes(video.get("date")))
+        bs.append(self.TAG_YEAR)
+        if len(video.get("date")) > 4:
+            bs.append(int2bytes(int(video.get("date")[:4])))
+            bs.append(self.TAG_EPISODE_RELEASE_DATE)
+            bs.append(str2bytes(video.get("date")))
+        else:
+            bs.append(int2bytes(0))
 
         # Locked (not update from internet)
-        bs.append(b"\x38\x01")
+        bs.append(self.TAG_EPISODE_LOCKED)
+        bs.append(b"\x01")
 
         # Summary
         if (len(video.get("outline")) > 0):
-            bs.append(b"\x42")
-            bs.append(str2bytes(video.get("outline")))
+            bs.append(self.TAG_CHAPTER_SUMMARY)
+            bs.append(str2bytes("outline"))
 
         # Meta json (null)
-        bs.append(b"\x4a\x04\x6e\x75\x6c\x6c")
+        bs.append(self.TAG_EPISODE_META_JSON)
+        bs.append(str2bytes("null"))
 
         # Group Info
         info = bitstring.BitStream()
         # Cast
         for actor in video.get("cast"):
-            info.append(b"\x0a")
+            info.append(self.TAG1_CAST)
             info.append(str2bytes(actor))
         # Director
-        info.append(b"\x12")
+        info.append(self.TAG1_DIRECTOR)
         info.append(str2bytes(video.get("director")))
         # Genre
         for genre in video.get("genres"):
-            info.append(b"\x1a")
+            info.append(self.TAG1_GENRE)
             info.append(str2bytes(genre))
+        info.append(self.TAG1_WRITER)
+        info.append(str2bytes(video.get("maker")))
         # End of Group
-        bs.append(b"\x52")
-        bs.append(int2bytes(len(info)))
+        bs.append(self.TAG_GROUP1)
+        bs.append(int2bytes(len(info.bytes)))
         bs.append(info)
 
         # Classification
-        bs.append(b"\x5a")
-        bs.append(str2bytes("R18+"))
+        if len(video.get("mpaa")) > 0:
+            bs.append(self.TAG_CLASSIFICATION)
+            bs.append(str2bytes(video.get("mpaa")))
+
+        # Rating
+        if len(video.get("review")) > 0:
+            bs.append(self.TAG_RATING)
+            bs.append(int2bytes(int(float(video.get("review")) * 10)))
 
         # Poster (BASE64 + MD5)
-        bs.append(b"\x8a\x01")
-        poster_b64_bytes = base64.b64encode(video.get('poster'))
-        bs.append(int2bytes(len(poster_b64_bytes)))
-        bs.append(poster_b64_bytes)
-        bs.append(b"\x92\x01")
-        bs.append(str2bytes(hashlib.md5(poster_b64_bytes).hexdigest()))
+        if len(video.get('poster')) > 0:
+            bs.append(self.TAG_EPISODE_THUMB_DATA)
+            bs.append(b"\x01")
+            bs.append(img2bytes(video.get('poster')))
+            bs.append(self.TAG_EPISODE_THUMB_MD5)
+            bs.append(b"\x01")
+            bs.append(str2bytes(hashlib.md5(video.get('poster')).hexdigest()))
 
         # Group Info
         info = bitstring.BitStream()
         # Background (BASE64 + MD5)
-        info.append(b"\x0a")
-        background_b64_bytes = base64.b64encode(video.get('fanart'))
-        info.append(int2bytes(len(background_b64_bytes)))
-        info.append(background_b64_bytes)
-        info.append(b"\x12")
-        info.append(str2bytes(hashlib.md5(background_b64_bytes).hexdigest()))
-        # Timestamp
-        info.append(b"\x18")
+        if len(video.get('fanart')) > 0:
+            info.append(self.TAG2_BACKDROP_DATA)
+            info.append(img2bytes(video.get('fanart')))
+            info.append(self.TAG2_BACKDROP_MD5)
+            info.append(str2bytes(hashlib.md5(video.get('fanart')).hexdigest()))
+        info.append(self.TAG2_TIMESTAMP)
         info.append(int2bytes(int(time.time() // 1000)))
         # End of Group
-        bs.append(b"\xaa\x01")
-        bs.append(int2bytes(len(info)))
+        bs.append(self.TAG_GROUP2)
+        bs.append(b'\x01')
+        bs.append(int2bytes(len(info.bytes)))
         bs.append(info)
 
         return bs.bytes

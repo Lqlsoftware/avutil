@@ -13,7 +13,7 @@ src_folder = "./"
 dst_folder = "./"
 http_proxy = ""
 source = avutil.source.Library
-encoder = avutil.encoder.NFOEncoder
+encoders = []
 thread = 8
 with_poster = False
 
@@ -23,7 +23,7 @@ def VideoProcess(video):
     global dst_folder
     global http_proxy
     global source
-    global encoder
+    global encoders
     global thread
     global with_poster
 
@@ -43,8 +43,9 @@ def VideoProcess(video):
         # Tidy up
         video.rename(dst_dir=dst_folder)
 
-        # Save video info as .nfo
-        video.save_info(dst_dir=dst_folder, encoder=encoder)
+        # Save video info with encoders
+        for encoder in encoders:
+            video.save_info(dst_dir=dst_folder, encoder=encoder)
     except Exception as e:
         print("WARN:", e)
         pass
@@ -66,7 +67,7 @@ def get_arguments(args=sys.argv[1:]):
     parser.add_argument("-t", "--thread", dest='thread', type=int,
                         help="threads num, use multi-threads to download info & images")
     parser.add_argument("-e", "--encoder", dest='encoder',
-                        help="encoder of meta-data, 'nfo'(default) or 'vsmeta'")
+                        help="encoders of meta-data, 'nfo'(default) or 'vsmeta'", )
     parser.add_argument("--with-poster", dest='with_poster', action='store_true',
                         help="save poster")
     return parser.parse_args(args)
@@ -78,7 +79,7 @@ def main():
     global dst_folder
     global http_proxy
     global source
-    global encoder
+    global encoders
     global thread
     global with_poster
 
@@ -100,8 +101,15 @@ def main():
         source = avutil.source.Bus
 
     # Encoder
-    if args.encoder == "vsmeta":
-        encoder = avutil.encoder.VSMETAEncoder
+    if args.encoder is not None:
+        selected_encoders = args.encoder.split(",")
+        for e in selected_encoders:
+            if e == "nfo":
+                encoders.append(avutil.encoder.NFOEncoder)
+            elif e == "vsmeta":
+                encoders.append(avutil.encoder.VSMETAEncoder)
+    else:
+        encoders = [avutil.encoder.NFOEncoder]
 
     # Gen poster
     if args.with_poster == True:
