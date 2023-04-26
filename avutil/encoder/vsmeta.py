@@ -4,6 +4,16 @@ import time
 import bitstring
 
 
+def trim(string: str, limit: int):
+    ''' Trim string to fit upperlimit
+
+    '''
+    ret = string
+    while len(ret.encode("utf-8")) > limit:
+        ret = ret[:-1]
+    return ret
+
+
 def int2bytes(integer: int):
     ''' Encode integer as bytes with vsmeta format
 
@@ -31,6 +41,10 @@ def str2bytes(string: str):
 
 
 def img2bytes(image: bytes):
+    ''' Encode image as bytes with vsmeta format
+
+        bytes: str2bytes(base64 + \\n every 76 chars)
+    '''
     b64_bytes = base64.b64encode(image)
 
     out_str = ''
@@ -92,13 +106,13 @@ class VSMETAEncoder:
 
         # Main Title
         bs.append(self.TAG_SHOW_TITLE)
-        bs.append(str2bytes(video.get("designatio")))
+        bs.append(str2bytes(trim(video.get("designatio"), 255)))
         bs.append(self.TAG_SHOW_TITLE2)
-        bs.append(str2bytes(video.get("title")))
+        bs.append(str2bytes(trim(video.get("title"), 255)))
 
         # Title
         bs.append(self.TAG_EPISODE_TITLE)
-        bs.append(str2bytes(video.get("title")))
+        bs.append(str2bytes(trim(video.get("title"), 255)))
 
         # Date
         bs.append(self.TAG_YEAR)
@@ -116,7 +130,7 @@ class VSMETAEncoder:
         # Summary
         if (len(video.get("outline")) > 0):
             bs.append(self.TAG_CHAPTER_SUMMARY)
-            bs.append(str2bytes("outline"))
+            bs.append(str2bytes(video.get("outline")))
 
         # Meta json (null)
         bs.append(self.TAG_EPISODE_META_JSON)
