@@ -28,7 +28,7 @@ class VideoInfo:
         self.genres = []
         self.cast = []
         self.is_subtitle = False
-        self.is_ncensored = False
+        self.is_uncensored = False
         self.is_4K = False
 
     def __str__(self):
