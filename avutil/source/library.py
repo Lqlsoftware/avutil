@@ -30,7 +30,7 @@ class Library:
         try:
             response = requests.get(Library.base_url, proxies={
                                     "http": self.http_proxy})
-            if response.text.find("Cloudflare") != -1:
+            if response.text.find("Cloudflare") != -1 or response.text.find("Just a moment...") != -1:
                 raise Exception()
         except Exception:
             # Get new base_url gif
@@ -83,7 +83,8 @@ class Library:
                 raise Exception("Not recruited")
 
             # multiple result - choose the correct one
-            matched = [i for i in range(0, len(video)) if video[i]['title'].startswith(designatio + " ") ]
+            matched = [i for i in range(
+                0, len(video)) if video[i]['title'].startswith(designatio + " ")]
             idx = None
             if len(matched) == 0:
                 raise Exception("Not recruited")

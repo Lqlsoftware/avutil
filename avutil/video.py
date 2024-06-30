@@ -130,7 +130,7 @@ class Video:
         img_bytes = io.BytesIO()
         with PIL.Image.open(io.BytesIO(dw_bytes.getvalue())) as img:
             img.crop((img.width / 1.9, 0, img.width, img.height)
-                     ).save(img_bytes, format='jpeg')
+                     ).convert('RGB').save(img_bytes, format='jpeg')
 
         # Update fanart, thumb
         self.info.fanart = dw_bytes.getvalue()
