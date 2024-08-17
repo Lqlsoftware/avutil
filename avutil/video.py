@@ -119,8 +119,24 @@ class Video:
             return False
 
         # Download image
+        headers = {
+            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Priority": "i",
+            "Referer": self.video_url,
+            "Sec-Ch-Ua-Platform": "macOS",
+            "Sec-Ch-Ua": "\"Google Chrome\";v=\"127\", \" Not)A;Brand\";v=\"99\", \"Chromium\";v=\"127\"",
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Fetch-Dest": "image",
+            "Sec-Fetch-Mode": "no-cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+        }
         dw_bytes = io.BytesIO()
-        r = requests.get(self.info.cover_url, stream=True,
+        r = requests.get(self.info.cover_url, stream=True, headers=headers,
                          proxies={"http": http_proxy})
         if r.status_code == 200:
             for chunk in r:
